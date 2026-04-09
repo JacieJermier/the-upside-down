@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Upside Down — VISAP Pictorial</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  @page {
+    size: letter;
+    margin: 0;
+  }
+  
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+    background: #fff;
+  }
+  
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    background: #fff;
+  }
+  
+  .page-dark {
+    background: #0a0a0a;
+    color: #e0e0e0;
+  }
+  
+  .page-black {
+    background: #000;
+    color: #e0e0e0;
+  }
+  
+  /* Full-bleed image */
+  .full-bleed {
+    width: 100%;
+    display: block;
+  }
+  
+  .full-bleed-contain {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  /* Padded content */
+  .content {
+    padding: 0.75in 0.85in;
+  }
+  
+  .content-narrow {
+    padding: 0.5in 0.85in;
+  }
+  
+  /* Typography */
+  h1 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 32pt;
+    font-weight: 600;
+    line-height: 1.15;
+    margin-bottom: 0.15in;
+  }
+  
+  h2 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18pt;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.1in;
+  }
+  
+  h3 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.08in;
+  }
+  
+  .subtitle {
+    font-size: 14pt;
+    font-weight: 300;
+    color: #555;
+    margin-bottom: 0.2in;
+  }
+  
+  .author {
+    font-size: 11pt;
+    color: #666;
+    margin-bottom: 0.4in;
+  }
+  
+  .caption {
+    font-size: 9pt;
+    color: #666;
+    line-height: 1.4;
+    font-style: italic;
+    padding: 6px 0;
+  }
+  
+  .caption-light {
+    font-size: 9pt;
+    color: #999;
+    line-height: 1.4;
+    font-style: italic;
+    padding: 6px 0;
+  }
+  
+  .body-text {
+    font-size: 10.5pt;
+    line-height: 1.6;
+    margin-bottom: 0.12in;
+    text-align: justify;
+  }
+  
+  .body-text-light {
+    font-size: 10.5pt;
+    line-height: 1.6;
+    margin-bottom: 0.12in;
+    color: #ccc;
+    text-align: justify;
+  }
+  
+  .pull-quote {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 20pt;
+    font-weight: 500;
+    font-style: italic;
+    color: #cc2222;
+    line-height: 1.35;
+    padding: 0.2in 0;
+    border-left: 4px solid #cc2222;
+    padding-left: 0.25in;
+    margin: 0.2in 0;
+  }
+  
+  .pull-quote-dark {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 20pt;
+    font-weight: 500;
+    font-style: italic;
+    color: #cc4444;
+    line-height: 1.35;
+    padding: 0.2in 0;
+    border-left: 4px solid #cc4444;
+    padding-left: 0.25in;
+    margin: 0.2in 0;
+  }
+  
+  .act-label {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 11pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #cc2222;
+    margin-bottom: 0.05in;
+  }
+  
+  .act-label-light {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 11pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #cc4444;
+    margin-bottom: 0.05in;
+  }
+  
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3in;
+  }
+  
+  .img-with-caption {
+    margin-bottom: 0.15in;
+  }
+  
+  .img-with-caption img {
+    width: 100%;
+    display: block;
+    border: 1px solid #eee;
+  }
+  
+  .img-dark img {
+    border: 1px solid #333;
+  }
+  
+  .page-number {
+    position: absolute;
+    bottom: 0.4in;
+    right: 0.85in;
+    font-size: 9pt;
+    color: #999;
+  }
+  
+  .page-number-light {
+    position: absolute;
+    bottom: 0.4in;
+    right: 0.85in;
+    font-size: 9pt;
+    color: #555;
+  }
+  
+  .divider {
+    width: 2in;
+    height: 2px;
+    background: #cc2222;
+    margin: 0.15in 0 0.2in 0;
+  }
+  
+  .divider-light {
+    width: 2in;
+    height: 2px;
+    background: #cc4444;
+    margin: 0.15in 0 0.2in 0;
+  }
+  
+  .spacer { height: 0.25in; }
+  .spacer-sm { height: 0.12in; }
+  
+  .tag {
+    display: inline-block;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #cc2222;
+    border: 1px solid #cc2222;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-right: 6px;
+  }
+  
+  .overlay-text {
+    position: absolute;
+    bottom: 0.5in;
+    left: 0.85in;
+    right: 0.85in;
+    color: #fff;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+  }
+  
+  .overlay-text h1 {
+    color: #fff;
+  }
+  
+  .overlay-text .subtitle {
+    color: #ccc;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1: COVER ==================== -->
+<div class="page page-black" style="display:flex; flex-direction:column; justify-content:center;">
+  <div class="content">
+    <div style="color:#cc2222; font-size:11pt; text-transform:uppercase; letter-spacing:4px; margin-bottom:0.3in;">VISAP Pictorial</div>
+    <h1 style="color:#cc2222; font-size:42pt; margin-bottom:0.15in;">The Upside Down</h1>
+    <div style="font-size:16pt; color:#999; font-weight:300; margin-bottom:0.5in;">Narrative Visualization of COVID-19<br>Wastewater Surveillance as Early Warning</div>
+    <div class="divider-light"></div>
+    <div style="color:#888; font-size:11pt; margin-bottom:0.05in;">Jacie Jermier</div>
+    <div style="color:#666; font-size:10pt; font-style:italic;">University of Waterloo, 2026</div>
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+    <img src="/project/HCI-Images/Tilt_2.png" alt="" style="width:100%; border-radius:4px; box-shadow: 0 4px 40px rgba(200,30,30,0.3);">
+    <div class="caption-light">Two transparent map layers separate in 3D space, revealing the void between the clinical surface world and the wastewater Upside Down.</div>
+  </div>
+  <div class="page-number-light">1</div>
+</div>
+
+<!-- ==================== PAGE 2: SUMMARY ==================== -->
+<div class="page">
+  <div class="content">
+    <h3>Summary</h3>
+    <div class="divider"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text">
+      Wastewater surveillance can detect SARS-CoV-2 outbreaks days to weeks before clinical case counts rise. Yet the CDC's existing dashboards rely on line charts and choropleth maps that serve experts well but fail to make this data compelling to a more general audience. The virus was detectable underground days to weeks before it ever showed up in hospitals. If the goal is to move beyond informing experts and actually reach the public, the data needs to be presented through a narrative that people are drawn to.
+    </div>
+    <div class="body-text">
+      <em>The Upside Down</em> is an animated, web-based narrative visualization that uses a <em>Stranger Things</em>-inspired figurative frame to make the lead-lag relationship between wastewater viral signals and clinical COVID-19 cases easily understandable. Because the metaphor is already familiar, viewers grasp the data relationship without explanation and are compelled to explore it. The system renders two transparent deck.gl map layers, one red for wastewater detection and one blue for clinical cases, that separate and rejoin in 3D space to dramatize the moment underground signals breach into visible outbreaks.
+    </div>
+    <div class="body-text">
+      A synchronized ridgeline plot encodes regional lead times, and guided narrative annotations walk viewers through three major variant waves (Delta, Omicron, and BA.5). The five-act animation structure follows Segel and Heer's "martini glass" model, where an author-driven guided sequence opens into free exploration via scrubbing, variant selection, and interactive ridgeline highlighting.
+    </div>
+    <div class="body-text">
+      The figurative frame is grounded in visualization theory, not just aesthetics. Byrne et al. introduced the concept of figurative frames, which are visual metaphors in data visualization that extend beyond decoration to shape how viewers interpret data. They argue that figurative elements can expand a visualization's expressive range by leveraging cultural knowledge. The <em>Stranger Things</em> metaphor fits here because viewers already understand the show's central concept of a parallel dimension occupying the same physical space. That familiarity makes the epidemiological relationship intuitive without explanation. The figurative frame also keeps the audience anchored to this idea throughout the entire experience, so every visual element they encounter reinforces the same story rather than feeling like disconnected data points.
+    </div>
+    
+    <div class="spacer"></div>
+    <h3>Design Contributions</h3>
+    <div class="divider"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text"><strong>1. Two-layer 3D map architecture.</strong> Two transparent deck.gl WebGL map instances share a synchronized viewport inside a CSS <code>preserve-3d</code> scene. When tilted to 65° on the X-axis, they separate in Z-space, making the metaphor of parallel dimensions physically visible.</div>
+    <div class="body-text"><strong>2. Temporal encoding through animation.</strong> Playback pauses during 3D tilt animations so data doesn't advance while the viewer watches the cinematic sequence. Clinical cracks only begin rendering after the blue surface map lands back down, so the viewer watches them grow from zero.</div>
+    <div class="body-text"><strong>3. Ridgeline lead-lag encoding.</strong> A D3.js ridgeline plot stacks geographical regions with dual curves (wastewater red, clinical blue). The horizontal displacement between peaks directly encodes lead time. Hover reveals individual regions from a ghost default state.</div>
+    <div class="body-text"><strong>4. Figurative frame as structural metaphor.</strong> The Upside Down is not decoration. The spatial separation between the two map layers directly mirrors the temporal separation between wastewater detection and clinical outbreak. The metaphor and the data relationship share the same structure.</div>
+  </div>
+  <div class="page-number">2</div>
+</div>
+
+<!-- ==================== PAGE 3: THE METAPHOR ==================== -->
+<div class="page page-black">
+  <div class="content">
+    <div class="act-label-light">The Metaphor</div>
+    <h2 style="color:#eee;">Two Worlds, One Reality</h2>
+    <div class="divider-light"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text-light">
+      In <em>Stranger Things</em>, the Upside Down is a parallel dimension occupying the same physical space as our world. Dark, hidden, and harboring threats before they break through to the surface. COVID-19 wastewater surveillance presents the same structural relationship. Viral RNA is detectable in wastewater systems days to weeks before hospitals register the first patients.
+    </div>
+    <div class="pull-quote-dark">"The metaphor maps directly onto the data. The virus exists below before it exists above."</div>
+    <div class="body-text-light">
+      This visualization makes that metaphor literal. Two transparent map layers, one red for wastewater and one blue for clinical cases, occupy the same space. When flat, they overlap perfectly. When the scene tilts, they reveal themselves as separate planes with a void between them. Two dimensions of the same outbreak, separated by time.
+    </div>
+    <div class="spacer"></div>
+    <div class="two-col">
+      <div class="img-with-caption img-dark">
+        <img src="/project/HCI-Images/Start_1.png" alt="">
+        <div class="caption-light">The start screen invites the viewer to "Enter the Upside Down." Both map layers are visible but flat, overlapping as one. The blue surface layer sits on top of the red wastewater layer.</div>
+      </div>
+      <div class="img-with-caption img-dark">
+        <img src="/project/HCI-Images/Tilt_1.png" alt="">
+        <div class="caption-light">The scene tilts to 65° on the X-axis, before separating the layers in Z-space. The blue surface (top) lays on the red Upside Down (bottom). Dust particles drift in the background.</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-number-light">3</div>
+</div>
+
+<!-- ==================== PAGE 4: ACT 1 - ENTRY ==================== -->
+<div class="page page-dark">
+  <div class="content-narrow">
+    <div class="act-label-light">Act 1</div>
+    <h2 style="color:#eee;">Entry. Into the Upside Down</h2>
+    <div class="divider-light"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text-light">
+      The 11.5-second entry sequence establishes the two-world metaphor. The scene tilts to reveal both layers stacked in 3D space. The blue surface layer separates upward in Z-space, hovers to let the viewer absorb the void between worlds, then flies away entirely. The scene un-tilts back to 0°, leaving the red Upside Down map flat and ready. Dust particles, the floating spores of Stranger Things, drift through the frame.
+    </div>
+  </div>
+  <img src="/project/HCI-Images/Tilt_2.png" alt="" style="width:100%; display:block; margin-top:-0.1in; box-shadow: 0 4px 40px rgba(200,30,30,0.3);">
+  <div class="content-narrow">
+    <div class="caption-light">The surface layer separates from the Upside Down, rising in Z-space with translateZ(140px). CSS perspective at 1400px and cubic-bezier easing create the 3D depth effect. The red rift of state boundaries below is the surveillance network. Watching, detecting, waiting.</div>
+  </div>
+  <div class="page-number-light">4</div>
+</div>
+
+<!-- ==================== PAGE 5: ACT 2 - DETECTION ==================== -->
+<div class="page page-black">
+  <div class="content-narrow">
+    <div class="act-label-light">Act 2</div>
+    <h2 style="color:#eee;">Detection. The Underground Watches</h2>
+    <div class="divider-light"></div>
+    <div class="spacer-sm"></div>
+  </div>
+  <div style="padding: 0 0.85in;">
+    <img src="/project/HCI-Images/Detection_3.png" alt="" style="width:100%; display:block; margin-top:-0.1in">
+  </div>
+  <div class="content-narrow">
+    <div class="caption-light">June 21, 2021. Wastewater sampling sites across the Pacific Northwest and Midwest glow red as SARS-CoV-2 RNA concentrations climb. Dot radius encodes viral percentile intensity, with brighter dots indicating higher concentrations. 91 sites are detecting viral RNA. Hospitals have not yet seen the surge.</div>
+    <div class="spacer"></div>
+    <div class="body-text-light">
+      After the entry sequence, the red map lies flat. Playback begins and wastewater detection dots appear at treatment plant locations across the country, their size and glow intensity encoding the viral RNA percentile from the CDC's NWSS data.
+    </div>
+    <div class="body-text-light">
+      The first narrative card fires at 40% of the pre-breach timeline. <em>"The signal spreads. Viral RNA concentrations climbing across treatment plants."</em> The viewer watches dots multiply and intensify.
+    </div>
+    <div class="pull-quote-dark">"The red dots are the early warning that nobody saw."</div>
+  </div>
+  <div class="page-number-light">5</div>
+</div>
+
+<!-- ==================== PAGE 6: ACT 3 - THE BREACH (spread) ==================== -->
+<div class="page page-black">
+  <div class="content-narrow">
+    <div class="act-label-light">Act 3</div>
+    <h2 style="color:#eee;">The Breach. It Breaks Through</h2>
+    <div class="divider-light"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text-light">
+      At the flip date, playback pauses entirely. The scene tilts back to 65°, and the blue surface map reappears, floating above the red wastewater layer with a tiny gap between them now. The viewer holds on this image for 2 seconds. Two worlds, separated by time, about to collide.
+    </div>
+    <div class="body-text-light">
+      Then the surface lays down. The scene un-tilts. And only <em>now</em> does the system set the clinical outbreak flag. The viewer watches cracks grow from zero because no data advanced during the 12-second animation. Every crack they see is happening in real time.
+    </div>
+  </div>
+  <div style="padding:0 0.85in;">
+    <img src="/project/HCI-Images/Breach_4.png" alt="" style="width:100%; display:block; margin-top:-0.1in">
+  </div>
+  <div class="content-narrow">
+    <div class="caption-light">July 26, 2021. The surface world catches up. Clinical outbreak cracks appear on the blue layer, concentrated in Missouri, where wastewater had been at 94–100% detection since mid-June. The temporal gap between wastewater detection (Act 2) and clinical confirmation (Act 3) is the lead time made visible.</div>
+  </div>
+  <div class="page-number-light">6</div>
+</div>
+
+<!-- ==================== PAGE 7: CRACKS GROWING ==================== -->
+<div class="page page-black">
+  <div style="padding:0.5in 0.85in 0 0.85in;">
+    <img src="/project/HCI-Images/Cracks_5.png" alt="" style="width:100%; display:block; margin-top:-0.1in">
+  </div>
+  <div class="content-narrow">
+    <div class="caption-light">August 9, 2021. Clinical cracks intensify across Missouri and spread into neighboring states. Crack paths are procedurally generated per site using a seeded PRNG (Mulberry32), with intensity combining state-level case data and site-level wastewater signal strength, smoothed via exponential moving average.</div>
+    <div class="spacer"></div>
+    <div class="body-text-light">
+      The crack visualization encodes two dimensions simultaneously. The <em>spatial distribution</em> of cracks shows where outbreaks are concentrated. The <em>intensity</em> of each crack reflects both clinical case severity (from CDC state data) and how strong the wastewater signal was at that site. This means sites with the earliest, strongest wastewater warnings produce the most dramatic cracks when clinical cases finally arrive.
+    </div>
+    <div class="body-text-light">
+      This is where the metaphor becomes literal. The red dots from Act 2 showed the virus hiding underground. The amber cracks in Act 3 show it breaking through to the surface. The time the viewer spent waiting between those two moments is how they experience the lead-lag time. It is not an exact measurement, but it is something they <em>feel</em>.
+    </div>
+  </div>
+  <div class="page-number-light">7</div>
+</div>
+
+<!-- ==================== PAGE 8: ACT 4 - ZOOM ==================== -->
+<div class="page page-black">
+  <div class="content-narrow">
+    <div class="act-label-light">Act 4</div>
+    <h2 style="color:#eee;">Zoom. The Underground Saw It First</h2>
+    <div class="divider-light"></div>
+    <div class="spacer-sm"></div>
+  </div>
+  <div style="padding:0 0.85in;">
+    <img src="/project/HCI-Images/Oregon-Zoom_6.png" alt="" style="width:100%; display:block; margin-top:-0.1in">
+  </div>
+  <div class="content-narrow">
+    <div class="caption-light">September 6, 2021. The camera has zoomed to Oregon. The narrative reads "The underground saw it first. Wastewater signaled the Delta surge weeks before case counts rose." The ridgeline plot (bottom) slides in, compressing the map area. The lead time annotation displays a conservative estimate of 1 week, though the ridgeline reveals the regional peak-to-peak gap for the Pacific NW was approximately 4 weeks. This discrepancy reflects the difference between state-level estimates and regional peak-to-peak measurement.</div>
+    <div class="spacer"></div>
+    <div class="body-text-light">
+      After the cracks begin growing, the camera flies to the variant's focal state (Oregon for Delta, Illinois for Omicron, Georgia for BA.5). The ridgeline plot slides up from the bottom, compressing the map into the upper 60% of the viewport. Both the map and ridgeline are now visible simultaneously, encoding the same lead-lag relationship in two different visual channels, spatial (map) and temporal (ridgeline).
+    </div>
+  </div>
+  <div class="page-number-light">8</div>
+</div>
+
+<!-- ==================== PAGE 9: FULL US PULLBACK ==================== -->
+<div class="page page-black">
+  <div style="padding:0.5in 0.85in 0 0.85in;">
+  </div>
+  <div class="content-narrow">
+    <div class="spacer"></div>
+    <div class="act-label-light">Act 5</div>
+    <h2 style="color:#eee;">Resolution. The Whole Picture</h2>
+    <div class="divider-light"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text-light">
+      The camera pulls back to show the full United States so the viewer can watch breach patterns spread beyond the focal state. For Delta, this is where Missouri's cracks become visible, a state where wastewater had detected the surge 2 weeks before clinical cases confirmed it. The closing narrative wraps up the variant's story while lead time annotations stay on screen.    </div>
+    <div class="body-text-light">
+      Lead time annotations remain on screen. The viewer can now replay, switch to Omicron or BA.5, or freely scrub the timeline. The martini glass has opened. The viewer who started as a passive audience member now has the mental model to explore the data on their own terms. More importantly, they leave knowing that this surveillance is not hypothetical. The CDC is actively monitoring wastewater for threats like bird flu right now, and that data is publicly available. Because they already understand the story of how underground signals predict surface outbreaks, they can look at real wastewater dashboards and actually make sense of what they are seeing.
+    </div>
+    <img src="/project/HCI-Images/Full-US-Lead-Lag-Time_7.png" alt="" style="width:100%; display:block; margin:2em 0">
+    <div class="caption-light">November 29, 2021. The camera has pulled back to reveal the full United States. Lead time annotations persist in the lower left showing Oregon 1 week early, Missouri 2 weeks early, and Arizona 1 week early. Wastewater dots (red, Oregon) and clinical cracks (amber, Missouri) are simultaneously visible, encoding the lead-lag relationship across the entire country.</div>
+  </div>
+  <div class="page-number-light">9</div>
+</div>
+
+<!-- ==================== PAGE 10: RIDGELINE DEEP DIVE ==================== -->
+<div class="page page-black">
+  <div class="content-narrow">
+    <div class="act-label-light">The Ridgeline</div>
+    <h2 style="color:#eee;">Encoding Lead Time Directly</h2>
+    <div class="divider-light"></div>
+    <div class="spacer-sm"></div>
+  </div>
+  <div style="padding:0 0.5in;">
+    <img src="/project/HCI-Images/Lead-Lag-Time_Highlighted_8.png" alt="" style="width:100%; border-radius:2px; box-shadow: 0 4px 40px rgba(200,30,30,0.3);">
+  </div>
+  <div class="content-narrow">
+    <div class="caption-light">The ridgeline plot with the Appalachian region highlighted on hover. The red filled area shows wastewater signal intensity. The blue dashed line shows clinical case counts. The horizontal gap between the red peak and the blue peak directly encodes the lead time for that region.</div>
+    <div class="spacer"></div>
+    <div class="body-text-light">
+      The ridgeline plot is the analytical complement to the map's narrative function. It stacks several U.S. regions vertically, each showing paired wastewater (red fill) and clinical (blue dashed) curves normalized to their regional maximum.
+    </div>
+    <div class="body-text-light">
+      The default state is intentionally transparent, with all regions rendered at low opacity and muted colors. This forces the viewer to interact. Hovering a region reveals its full color while others remain faded. This focus + context technique, inspired by Wilke's ridgeline design principles, prevents the visual overload of many overlapping dual-curves and instead guides the viewer through region comparison.
+    </div>
+    <div class="body-text-light">
+      A white vertical marker line tracks the current week in the animation, tying the ridgeline directly to the map timeline. When the marker crosses a region's wastewater peak before its clinical peak, the viewer sees the lead time as horizontal distance between vertical lines and peaks.
+    </div>
+  </div>
+  <div class="page-number-light">10</div>
+</div>
+
+<!-- ==================== PAGE 11: DESIGN EVOLUTION ==================== -->
+<div class="page">
+  <div class="content">
+    <h3>Design Process</h3>
+    <h2>From Flip to Float</h2>
+    <div class="divider"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text">
+      The 3D map effect went through three major iterations before arriving at the current two-layer separation approach.
+    </div>
+    <div class="spacer-sm"></div>
+    
+    <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 0.2in; margin-bottom: 0.25in; padding: 0.15in; background: #f8f4f4; border-radius: 4px;">
+      <div>
+        <div class="tag">Iteration 1</div>
+        <div style="font-weight:600; margin-top:4px;">Y-Axis Rotation</div>
+      </div>
+      <div class="body-text" style="margin:0; font-size:9.5pt;">The map rotated 180° around the Y-axis, producing a mirror-flip effect. This was confusing because viewers couldn't tell what was "upside down" since the map simply appeared reversed. The mirror effect had no metaphorical connection to parallel dimensions.</div>
+    </div>
+    
+    <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 0.2in; margin-bottom: 0.25in; padding: 0.15in; background: #f8f4f4; border-radius: 4px;">
+      <div>
+        <div class="tag">Iteration 2</div>
+        <div style="font-weight:600; margin-top:4px;">Camera Flip</div>
+      </div>
+      <div class="body-text" style="margin:0; font-size:9.5pt;">The next attempt was inspired by the camera flips Stranger Things uses to transition between worlds, where the camera rotates through a surface and everything transforms around it. The goal was to recreate this by flipping the map on the X-axis toward the viewer. But what works as a split-second cinematic cut in a TV show falls apart in an interactive visualization. The map distorted mid-flip and the elements clipped through each other. The flip needed to be something you could watch and understand, not just survive, which led to the final approach of simply pulling the two layers apart.</div>
+    </div>
+    
+    <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 0.2in; margin-bottom: 0.25in; padding: 0.15in; background: #fff0f0; border-left:3px solid #cc2222; border-radius: 4px;">
+      <div>
+        <div class="tag">Final</div>
+        <div style="font-weight:600; margin-top:4px;">3D Z-Space Separation</div>
+      </div>
+      <div class="body-text" style="margin:0; font-size:9.5pt;">Two identical deck.gl instances inside a CSS <code>preserve-3d</code> container. Both render the same U.S. map with different color palettes. The scene tilts on the X-axis (65°) to reveal them as stacked transparent glass panes separated in Z-space (translateZ: 140px). This directly encodes the metaphor. Two worlds occupying the same location, separated by a dimensional gap.</div>
+    </div>
+    
+    <div class="spacer"></div>
+    <div class="pull-quote">"The critical insight was that viewers needed to see two transparent planes, not one plane flipping."</div>
+    <div class="spacer"></div>
+    
+    <div class="body-text">
+      <strong>Pacing was equally challenging.</strong> Initial versions played too fast for viewers to read narrative text or observe crack growth. The solution was three-fold. (1) auto-pause on narrative cards, giving the reader 4–5 seconds before playback resumes; (2) pausing playback entirely during the 12-second 3D tilt animation so no data advances while the viewer watches; and (3) delaying the <code>isFlipped</code> flag until after the animation completes, so cracks grow from zero in real time rather than appearing pre-computed.
+    </div>
+    <div class="body-text">
+      <strong>The crack timing problem</strong> was the subtlest bug. In early versions, <code>isFlipped = true</code> fired at the start of the 3D animation, so by the time the blue map landed down 12 seconds later, cracks had already been computing in the background and the viewer saw them appear fully formed rather than growing. Moving the flag to fire <em>after</em> the animation showed viewers cracks growing from nothing.
+    </div>
+  </div>
+  <div class="page-number">11</div>
+</div>
+
+<!-- ==================== PAGE 12: TECHNICAL ARCHITECTURE ==================== -->
+<div class="page">
+  <div class="content">
+    <h3>Implementation</h3>
+    <h2>Architecture</h2>
+    <div class="divider"></div>
+    <div class="spacer-sm"></div>
+    <div class="body-text">The visualization is a single HTML file (~1,800 lines) with no build step, no framework, and no server. Just vanilla JavaScript, deck.gl, and D3.js loaded from CDNs. Data is preprocessed in Python/Pandas into six JSON files totaling ~4.7MB.</div>
+    <div class="spacer-sm"></div>
+    
+    <div style="background:#f5f5f5; padding:0.2in; border-radius:4px; font-size:9.5pt; font-family: 'IBM Plex Sans', monospace; margin-bottom:0.2in;">
+      <div style="font-weight:600; margin-bottom:6px;">Layer Stack (Z-axis, bottom to top)</div>
+      <div style="color:#666;">
+        <code>z: 0px</code> — deck.gl instance 1 (red map, wastewater dots, black background)<br>
+        <code>z: 3px</code> — deck.gl instance 2 (blue map, clinical cracks, transparent background)<br>
+        <code>z: 140px</code> — instance 2 when <code>.separated</code> class applied<br>
+        <code>z: 400px</code> — instance 2 when <code>.gone</code> class applied (flies away)<br>
+        Both wrapped in <code>#scene-tilt</code> div with <code>transform-style: preserve-3d</code>
+      </div>
+    </div>
+    
+    <div style="background:#f5f5f5; padding:0.2in; border-radius:4px; font-size:9.5pt; font-family: 'IBM Plex Sans', monospace; margin-bottom:0.2in;">
+      <div style="font-weight:600; margin-bottom:6px;">Animation Timeline (enterUpsideDown)</div>
+      <div style="color:#666;">
+        <code>+0.3s</code> — Scene tilts to 65° (4s CSS transition)<br>
+        <code>+3.5s</code> — Surface separates with translateZ(140px) + dust appears<br>
+        <code>+7.0s</code> — Surface flies away with translateZ(400px), opacity→0<br>
+        <code>+9.0s</code> — Scene un-tilts to 0°<br>
+        <code>+11.5s</code> — <code>inUpsideDown = true</code>, callback fires, playback begins
+      </div>
+    </div>
+    
+    <div style="background:#f5f5f5; padding:0.2in; border-radius:4px; font-size:9.5pt; font-family: 'IBM Plex Sans', monospace; margin-bottom:0.2in;">
+      <div style="font-weight:600; margin-bottom:6px;">Animation Timeline (doFlip / The Breach)</div>
+      <div style="color:#666;">
+        <code>+0.0s</code> — pause(), scene tilts to 65°<br>
+        <code>+2.5s</code> — Surface reappears as .separated (translateZ: 140px)<br>
+        <code>+7.5s</code> — Surface slams down with translateZ(3px)<br>
+        <code>+9.5s</code> — Scene un-tilts to 0°<br>
+        <code>+12.0s</code> — <code>isFlipped = true</code>, play() — cracks start from zero
+      </div>
+    </div>
+    
+    <div class="body-text">
+      <strong>View synchronization.</strong> Both deck.gl instances share a viewport. The primary (red) map has <code>controller: true</code> and an <code>onViewStateChange</code> callback that pushes the new view state to the secondary (blue) map via <code>surfaceDeck.setProps()</code>. The <code>flyTo()</code> function updates both instances simultaneously.
+    </div>
+    <div class="body-text">
+      <strong>Crack generation.</strong> Each site's cracks are pre-generated at load time using Mulberry32 (a seeded 32-bit PRNG) keyed to <code>wwtp_id * 7919</code>. This produces 3–5 branching arms per site with 4–8 segments each, deterministic across sessions. At render time, crack reveal is driven by <code>getCrackAmount(combinedIntensity)</code>, which progressively reveals more arm segments and more arms as intensity increases.
+    </div>
+  </div>
+  <div class="page-number">12</div>
+</div>
+
+</body>
+</html>

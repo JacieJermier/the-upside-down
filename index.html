@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Upside Down — COVID-19 Wastewater Surveillance</title>
+  <script src="https://unpkg.com/deck.gl@8.9.35/dist.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000000; color: #e0e0e0;
+      font-family: 'Special Elite', monospace;
+      overflow-x: hidden; width: 100vw; height: 100vh;
+    }
+
+    /* === LAYOUT === */
+    #map-perspective {
+      width: 100%; height: calc(100vh - 80px);
+      perspective: 1400px;
+      perspective-origin: 50% 45%;
+      position: relative;
+      z-index: 1;
+      transition: height 1.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    #map-perspective.ridge-visible {
+      height: calc(60vh - 80px);
+    }
+
+    /* Scene tilt — rotates the entire 3D scene on X-axis */
+    #scene-tilt {
+      width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateX(0deg);
+      transition: transform 2.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+      position: relative;
+    }
+    #scene-tilt.tilted {
+      transform: rotateX(65deg);
+    }
+
+    /* Map container — the bottom layer (the Upside Down) */
+    #map-container {
+      width: 100%; height: 100%;
+      position: absolute; top: 0; left: 0;
+      transform: translateZ(0px);
+    }
+
+    /* Surface layer — the top layer (the normal world) — transparent glass pane */
+    #surface-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: transparent;
+      pointer-events: none;
+      transform: translateZ(3px);
+      transition: transform 2s cubic-bezier(0.4, 0.0, 0.2, 1),
+                  opacity 2s ease;
+      opacity: 1;
+    }
+    #surface-layer.separated {
+      transform: translateZ(140px);
+    }
+    #surface-layer.gone {
+      transform: translateZ(400px);
+      opacity: 0;
+      transition: transform 2.5s cubic-bezier(0.4, 0.0, 0.2, 1),
+                  opacity 2s ease;
+    }
+    #surface-layer.collapsed {
+      transform: translateZ(3px);
+      opacity: 0;
+      transition: transform 1.2s cubic-bezier(0.6, 0, 0.4, 1),
+                  opacity 0.5s ease-out 0.5s;
+    }
+    /* Hidden = fully invisible, no transitions (for variant reset) */
+    #surface-layer.hidden {
+      opacity: 0;
+      transform: translateZ(3px);
+      transition: none;
+    }
+    #ridgeline-container {
+      position: fixed;
+      bottom: 80px;
+      left: 0;
+      right: 0;
+      height: 40vh;
+      background: rgba(10,5,5,0.92);
+      border-top: 1px solid #331515;
+      overflow: visible;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+      pointer-events: none;
+      z-index: 8;
+    }
+    #ridgeline-container.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* === OVERLAYS === */
+    #title-overlay {
+      position: absolute; top: 12px; left: 16px; z-index: 10; pointer-events: none;
+    }
+    #title-overlay h1 {
+      font-size: 24px; color: #cc2222;
+      text-shadow: 0 0 20px rgba(200,30,30,0.6); letter-spacing: 3px; text-transform: uppercase;
+    }
+    #title-overlay .subtitle { font-size: 13px; color: #888; margin-top: 2px; letter-spacing: 1px; }
+    #date-display {
+      position: absolute; top: 12px; right: 16px; z-index: 10; pointer-events: none; text-align: right;
+    }
+    #current-date {
+      font-size: 20px; color: #cc2222;
+      text-shadow: 0 0 15px rgba(200,30,30,0.5); letter-spacing: 2px;
+    }
+    #active-sites { font-size: 12px; color: #888; margin-top: 2px; }
+
+    /* === VARIANT SELECTOR === */
+    #variant-selector {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      z-index: 30; display: flex; gap: 6px;
+    }
+    .variant-btn {
+      background: rgba(20,5,5,0.8); border: 1px solid #553333; color: #999;
+      padding: 6px 14px; border-radius: 4px; cursor: pointer;
+      font-family: 'Special Elite', monospace; font-size: 12px;
+      letter-spacing: 1px; transition: all 0.3s;
+    }
+    .variant-btn:hover { border-color: #cc4422; color: #cc4422; }
+    .variant-btn.active {
+      border-color: #cc2222; color: #cc2222; background: rgba(80,10,10,0.5);
+      box-shadow: 0 0 12px rgba(200,30,30,0.3);
+    }
+
+    /* === NARRATIVE TEXT === */
+    #narrative-overlay {
+      position: absolute; top: 35%; left: 50%; transform: translate(-50%,-50%);
+      z-index: 15; pointer-events: none; text-align: center;
+      opacity: 0; transition: opacity 1.5s ease-in-out;
+      max-width: 700px; width: 90%;
+    }
+    #narrative-overlay.visible { opacity: 1; }
+    #narrative-text {
+      font-size: 28px; color: #cc2222;
+      text-shadow: 0 0 30px rgba(200,30,30,0.8),0 0 60px rgba(200,30,30,0.4);
+      letter-spacing: 4px; text-transform: uppercase; line-height: 1.4;
+    }
+    #narrative-subtext { font-size: 15px; color: #999; margin-top: 10px; letter-spacing: 1.5px; line-height: 1.6; }
+
+    /* === EVENT ANNOTATION === */
+    #event-annotation {
+      position: absolute; bottom: 8px; right: 16px; z-index: 10;
+      pointer-events: none; text-align: right;
+      opacity: 0; transition: opacity 1s ease-in-out;
+    }
+    #event-annotation.visible { opacity: 1; }
+    #event-text {
+      font-size: 13px; color: #cc6644;
+      text-shadow: 0 0 10px rgba(200,80,40,0.4);
+      letter-spacing: 2px; text-transform: uppercase;
+      border-right: 2px solid #cc4422; padding-right: 10px;
+    }
+
+    /* Lead time callout */
+    #lead-time-annotation {
+      position: fixed; bottom: 90px; left: 20px;
+      z-index: 12; pointer-events: none;
+      opacity: 0; transition: opacity 1.5s ease-in-out;
+    }
+    #lead-time-annotation.visible { opacity: 1; pointer-events: auto; }
+
+    #lead-time-toggle {
+      position: fixed; bottom: 92px; left: 20px;
+      z-index: 12; background: none; border: 1px solid #cc4422;
+      color: #cc4422; width: 28px; height: 28px; border-radius: 50%;
+      cursor: pointer; font-size: 14px; display: none;
+      align-items: center; justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 0 8px rgba(200,60,30,0.4);
+    }
+    #lead-time-toggle.show { display: flex; }
+    #lead-time-toggle:hover { background: rgba(200,60,30,0.2); }
+    #lead-time-text {
+      font-size: 15px; color: #ffaa33;
+      text-shadow: 0 0 15px rgba(255,170,50,0.5);
+      letter-spacing: 1px;
+      background: rgba(10,5,5,0.85);
+      padding: 12px 24px; border-radius: 6px;
+      border: 1px solid rgba(255,170,50,0.3);
+      text-align: left;
+      line-height: 1.7;
+    }
+
+    /* === PHASE INDICATOR === */
+    #phase-indicator {
+      position: absolute; bottom: 8px; left: 16px; z-index: 10;
+      pointer-events: none; font-size: 12px; letter-spacing: 1px;
+    }
+    #phase-indicator .phase-label { color: #cc2222; text-transform: uppercase; }
+    #phase-indicator .phase-desc { color: #666; margin-left: 8px; }
+
+    /* === LEGEND === */
+    #legend {
+      position: absolute; top: 70px; left: 16px; z-index: 10;
+      pointer-events: none; font-size: 11px;
+      display: flex; gap: 16px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .legend-dot.ww { background: #dd3333; box-shadow: 0 0 6px rgba(220,50,50,0.6); }
+    .legend-dot.crack { background: #cc3311; box-shadow: 0 0 6px rgba(220,60,10,0.6); width: 16px; height: 3px; border-radius: 1px; }
+    .legend-label { color: #777; }
+
+    /* === DUST CANVAS === */
+    #dust-canvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: calc(100vh - 80px);
+      z-index: 5; pointer-events: none; opacity: 1; transition: opacity 3s ease-out;
+    }
+    #dust-canvas.fade-out { opacity: 0; }
+
+    /* === START SCREEN === */
+    #start-overlay {
+      position: absolute; top: 0; left: 0; right: 0; height: calc(100vh - 80px);
+      z-index: 25; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: rgba(10,5,5,0.7); cursor: pointer; transition: opacity 1s;
+    }
+    #start-overlay.hidden { opacity: 0; pointer-events: none; }
+    #start-text {
+      font-size: 20px; color: #cc2222;
+      text-shadow: 0 0 20px rgba(200,30,30,0.5);
+      letter-spacing: 3px; text-transform: uppercase; animation: pulse 2s ease-in-out infinite;
+    }
+    #start-hint { font-size: 12px; color: #666; margin-top: 10px; letter-spacing: 1px; }
+    @keyframes pulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+    /* === TIMELINE === */
+    #timeline {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+      background: linear-gradient(to top, rgba(10,5,5,0.98), rgba(10,5,5,0.85));
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 0 40px; z-index: 10;
+    }
+    #timeline-controls { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 1200px; }
+    #timeline-controls.disabled { opacity: 0.3; pointer-events: none; }
+    #play-btn {
+      background: none; border: 1px solid #cc2222; color: #cc2222;
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      font-size: 12px; display: flex; align-items: center;
+      justify-content: center; transition: all 0.2s; flex-shrink: 0;
+    }
+    #play-btn:hover { background: rgba(200,30,30,0.2); }
+    #scrubber {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 3px; background: #331111; border-radius: 2px; outline: none; cursor: pointer;
+    }
+    #scrubber::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+      background: #cc2222; cursor: pointer; box-shadow: 0 0 8px rgba(200,30,30,0.6);
+    }
+    #scrubber::-moz-range-thumb {
+      width: 14px; height: 14px; border-radius: 50%; background: #cc2222;
+      cursor: pointer; border: none; box-shadow: 0 0 8px rgba(200,30,30,0.6);
+    }
+    #speed-btn {
+      background: none; border: 1px solid #553333; color: #888;
+      padding: 3px 8px; border-radius: 4px; cursor: pointer;
+      font-family: monospace; font-size: 11px; flex-shrink: 0; transition: all 0.2s;
+    }
+    #speed-btn:hover { border-color: #cc2222; color: #cc2222; }
+
+    #ridge-toggle, #audio-toggle, #info-toggle {
+      background: none; border: 1px solid #553333; color: #888;
+      padding: 3px 8px; border-radius: 4px; cursor: pointer;
+      font-size: 13px; flex-shrink: 0; transition: all 0.2s;
+    }
+    #ridge-toggle:hover, #audio-toggle:hover, #info-toggle:hover { border-color: #cc2222; }
+    #ridge-toggle.active, #audio-toggle.active { border-color: #cc2222; color: #cc2222; background: rgba(80,10,10,0.3); }
+
+    /* Scrubber wrapper for flip marker */
+    #scrubber-wrapper {
+      flex: 1; position: relative; display: flex; align-items: center;
+    }
+    #scrubber-wrapper #scrubber { width: 100%; }
+
+    #flip-marker {
+      position: absolute; top: -4px;
+      width: 2px; height: 22px;
+      background: #cc4422;
+      box-shadow: 0 0 6px rgba(200,60,30,0.6);
+      pointer-events: none;
+      border-radius: 1px;
+      left: 0;
+      transition: left 0.3s;
+    }
+    #flip-marker::after {
+      content: '⚡';
+      position: absolute;
+      top: -14px; left: -5px;
+      font-size: 10px;
+    }
+
+    /* Info panel */
+    #info-panel {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 50; background: rgba(5,2,2,0.92);
+      display: none; align-items: center; justify-content: center;
+    }
+    #info-panel.visible { display: flex; }
+    #info-content {
+      max-width: 600px; padding: 30px;
+      background: rgba(20,10,10,0.95);
+      border: 1px solid #553333; border-radius: 8px;
+      color: #ccc; font-family: 'Special Elite', monospace;
+      max-height: 80vh; overflow-y: auto;
+    }
+    #info-content h2 {
+      color: #cc2222; font-size: 20px; letter-spacing: 3px;
+      text-transform: uppercase; margin-bottom: 12px;
+      text-shadow: 0 0 10px rgba(200,30,30,0.4);
+    }
+    #info-content h3 {
+      color: #cc5544; font-size: 14px; letter-spacing: 2px;
+      text-transform: uppercase; margin-top: 16px; margin-bottom: 6px;
+    }
+    #info-content p {
+      font-size: 13px; line-height: 1.6; margin-bottom: 8px; color: #aaa;
+    }
+    #info-content strong { color: #ddd; }
+    #info-content em { color: #cc6644; }
+    #info-close {
+      margin-top: 16px; padding: 8px 24px;
+      background: none; border: 1px solid #cc2222; color: #cc2222;
+      font-family: 'Special Elite', monospace; font-size: 13px;
+      letter-spacing: 2px; cursor: pointer; border-radius: 4px;
+      transition: all 0.2s;
+    }
+    #info-close:hover { background: rgba(200,30,30,0.2); }
+    #timeline-dates {
+      display: flex; justify-content: space-between;
+      width: 100%; max-width: 1200px;
+      font-size: 10px; color: #555;
+      padding: 2px 46px 0 46px;
+    }
+
+    /* === TOOLTIP === */
+    #tooltip {
+      position: fixed; z-index: 30; pointer-events: none;
+      background: rgba(20,0,0,0.9); border: 1px solid #cc2222;
+      color: #e0e0e0; padding: 6px 10px; border-radius: 4px;
+      font-size: 11px; font-family: monospace; display: none;
+      box-shadow: 0 0 15px rgba(200,30,30,0.3);
+    }
+
+    /* === RIDGELINE === */
+    .ridge-label { fill: #999; font-size: 11px; font-family: 'Special Elite', monospace; }
+    .ridge-area-ww { fill: rgba(200,30,30,0.3); stroke: #cc2222; stroke-width: 1.5; }
+    .ridge-area-cl { fill: rgba(30,180,220,0.2); stroke: #22bbdd; stroke-width: 1.5; }
+    .ridge-timeline { stroke: #cc2222; stroke-width: 1; opacity: 0.8; }
+    #ridgeline-title {
+      position: absolute; top: 8px; left: 16px; font-size: 13px;
+      color: #cc2222; letter-spacing: 2px; text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div id="start-overlay">
+    <div id="start-text">Enter the Upside Down</div>
+    <div id="start-hint">click to begin</div>
+  </div>
+
+  <div id="map-perspective">
+    <div id="scene-tilt">
+      <div id="map-container"></div>
+      <div id="surface-layer"></div>
+    </div>
+  </div>
+  <canvas id="dust-canvas" class="fade-out"></canvas>
+
+  <div id="title-overlay">
+    <h1>The Upside Down</h1>
+    <div class="subtitle">COVID-19 Wastewater Surveillance</div>
+  </div>
+
+  <div id="variant-selector">
+    <button class="variant-btn active" data-variant="delta">Delta</button>
+    <button class="variant-btn" data-variant="omicron">Omicron</button>
+    <button class="variant-btn" data-variant="ba5">BA.5</button>
+  </div>
+
+  <div id="date-display">
+    <div id="current-date"></div>
+    <div id="active-sites"></div>
+  </div>
+
+  <div id="narrative-overlay">
+    <div id="narrative-text"></div>
+    <div id="narrative-subtext"></div>
+  </div>
+
+  <div id="event-annotation"><div id="event-text"></div></div>
+
+  <div id="lead-time-annotation">
+    <div id="lead-time-text"></div>
+  </div>
+  <button id="lead-time-toggle" title="Show lead time data">⚡</button>
+
+  <div id="phase-indicator">
+    <span class="phase-label" id="phase-label">Detection</span>
+    <span class="phase-desc" id="phase-desc">wastewater signals</span>
+  </div>
+
+  <div id="legend">
+    <div class="legend-item"><div class="legend-dot ww"></div><span class="legend-label">Wastewater signal</span></div>
+    <div class="legend-item"><div class="legend-dot crack"></div><span class="legend-label">Clinical outbreak</span></div>
+  </div>
+
+  <div id="ridgeline-container">
+    <div id="ridgeline-title">Lead-Lag by Region</div>
+    <svg id="ridgeline-svg"></svg>
+  </div>
+
+  <div id="timeline">
+    <div id="timeline-controls">
+      <button id="play-btn">&#9654;</button>
+      <div id="scrubber-wrapper">
+        <input type="range" id="scrubber" min="0" max="100" value="0">
+        <div id="flip-marker" title="The Breach"></div>
+      </div>
+      <button id="speed-btn">1x</button>
+      <button id="ridge-toggle" title="Toggle ridgeline plot">📊</button>
+      <button id="audio-toggle" title="Toggle audio">🔇</button>
+      <button id="info-toggle" title="About this visualization">ℹ️</button>
+    </div>
+    <div id="timeline-dates"><span id="tl-start"></span><span id="tl-mid"></span><span id="tl-end"></span></div>
+  </div>
+
+  <!-- Audio -->
+  <audio id="bg-audio" loop preload="auto">
+    <source src="./audio/stranger-things-theme.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Info/About panel -->
+  <div id="info-panel">
+    <div id="info-content">
+      <h2>About This Visualization</h2>
+      <p>This visualization explores how <strong>wastewater surveillance</strong> detected COVID-19 outbreaks before hospitals saw the surge. Using data from the CDC's National Wastewater Surveillance System (NWSS) and clinical case reports, it reveals the <strong>lead time</strong> between underground detection and surface-level outbreaks.</p>
+      <h3>The Metaphor</h3>
+      <p>Inspired by <em>Stranger Things</em>, the visualization frames wastewater data as <strong>the Upside Down</strong> — a hidden layer of reality where threats are detectable before they break through to the surface. This isn't just decoration: Byrne et al. (2019) showed that figurative frames in visualization expand expressiveness by layering descriptive meaning onto abstract data.</p>
+      <h3>How to Read It</h3>
+      <p><strong>Upside Down (mirrored map):</strong> Red dots show wastewater sampling sites detecting viral RNA. Brighter = stronger signal.</p>
+      <p><strong>The Breach (flip):</strong> When clinical cases surge, the map flips to normal orientation. Cracks appear where the virus broke through to hospitals.</p>
+      <p><strong>Ridgeline plot:</strong> Shows wastewater signal (solid) vs clinical cases (dashed) per region. The horizontal gap between peaks is the lead time.</p>
+      <h3>Data Sources</h3>
+      <p>CDC NWSS Public SARS-CoV-2 Wastewater Metric Data (2020–2022)<br>
+      CDC Weekly COVID-19 Cases and Deaths by State</p>
+      <button id="info-close">Close</button>
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <script>
+    // ============================================
+    // VARIANT DEFINITIONS
+    // ============================================
+    var VARIANTS = {
+      delta: {
+        name: 'Delta', start: '2021-06-15', end: '2021-11-30',
+        flipDate: '2021-07-19', peakDate: '2021-09-06',
+        narrative: ['Delta variant detected', 'Wastewater surveillance sounds the alarm'],
+        risingSignal: ['The signal spreads', 'Viral RNA concentrations climbing across treatment plants'],
+        preBreachText: 'Hospitals have not yet seen the surge',
+        breachNarrative: ['The breach', 'Clinical cases confirm what sewers already knew'],
+        insightNarrative: ['The underground saw it first', 'Wastewater signaled the Delta surge weeks before case counts rose'],
+        endNarrative: ['Early warning, confirmed', 'Across multiple states, wastewater led clinical detection by 1–2 weeks'],
+        eventLabel: 'Delta wave',
+        zoomTarget: { longitude: -120, latitude: 42, zoom: 4.2, pitch: 0, bearing: 0 },
+        zoomStateAbbrev: 'OR',
+        leadTimes: {
+          'OR': { days: 7, label: 'Oregon: 1 week early' },
+          'MO': { days: 14, label: 'Missouri: 2 weeks early' },
+          'AZ': { days: 7, label: 'Arizona: 1 week early' }
+        }
+      },
+      omicron: {
+        name: 'Omicron', start: '2021-11-01', end: '2022-04-30',
+        flipDate: '2021-12-20', peakDate: '2022-01-10',
+        narrative: ['Omicron is coming', 'The most transmissible variant yet'],
+        risingSignal: ['A nationwide signal', 'Wastewater sites detect viral RNA from coast to coast'],
+        preBreachText: 'Case counts still lag behind the sewers',
+        breachNarrative: ['The breach', 'The fastest surge yet overwhelms testing capacity'],
+        insightNarrative: ['The sewers knew', 'While tests ran short, wastewater never stopped detecting'],
+        endNarrative: ['When testing broke down, sewers held the line', 'Wastewater provided continuous surveillance even as clinical testing was overwhelmed'],
+        eventLabel: 'Omicron surge',
+        zoomTarget: { longitude: -89.5, latitude: 42, zoom: 4.5, pitch: 0, bearing: 0 },
+        zoomStateAbbrev: 'OR',
+        earlyLeadState: 'OR',
+        earlyLeadOffset: 2,
+        leadTimes: {
+          'OR': { days: 7, label: 'Oregon: 1 week early' },
+          'MT': { days: 7, label: 'Montana: 1 week early' },
+          'IL': { days: 7, label: 'Illinois: 1 week early' },
+          'FL': { days: 7, label: 'Florida: 1 week early' },
+          'KY': { days: 7, label: 'Kentucky: 1 week early' },
+          'GA': { days: 7, label: 'Georgia: 1 week early' }
+        }
+      },
+      ba5: {
+        name: 'BA.5', start: '2022-03-07', end: '2022-09-30',
+        flipDate: '2022-04-25', peakDate: '2022-07-18',
+        narrative: ['BA.5 subvariant emerges', 'Immune evasion drives a new wave'],
+        risingSignal: ['Reinfection wave building', 'Prior immunity offers less protection — wastewater catches the shift'],
+        preBreachText: 'Public attention has moved on, but the signal has not',
+        breachNarrative: ['The breach', 'A stealth wave surfaces in hospitals'],
+        insightNarrative: ['The hidden wave', 'Reduced testing missed BA.5 — but wastewater did not'],
+        endNarrative: ['Surveillance without symptoms', 'As fewer people tested, wastewater became the primary early warning system'],
+        eventLabel: 'BA.5 wave',
+        zoomTarget: { longitude: -84, latitude: 34, zoom: 4.2, pitch: 0, bearing: 0 },
+        zoomStateAbbrev: 'GA',
+        leadTimes: {
+          'OR': { days: 7, label: 'Oregon: 1 week early' },
+          'FL': { days: 7, label: 'Florida: 1 week early' },
+          'GA': { days: 7, label: 'Georgia: 1 week early' },
+          'IL': { days: 7, label: 'Illinois: 1 week early' },
+          'KY': { days: 7, label: 'Kentucky: 1 week early' },
+          'MO': { days: 7, label: 'Missouri: 1 week early' },
+          'ID': { days: 14, label: 'Idaho: 2 weeks early' },
+          'MT': { days: 14, label: 'Montana: 2 weeks early' }
+        }
+      }
+    };
+
+    // ============================================
+    // CRACK GENERATION
+    // ============================================
+    function mulberry32(a) {
+      return function() {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        var t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function generateCrackPaths(lon, lat, seed) {
+      var rng = mulberry32(seed);
+      var numArms = 3 + Math.floor(rng() * 3);
+      var arms = [];
+      for (var a = 0; a < numArms; a++) {
+        var angle = rng() * Math.PI * 2;
+        var numSegs = 4 + Math.floor(rng() * 4);
+        var path = [[lon, lat]]; var cLon = lon, cLat = lat;
+        for (var s = 0; s < numSegs; s++) {
+          var step = (0.15 + rng() * 0.2) * (1 - s / (numSegs + 2));
+          angle += (rng() - 0.5) * 1.2;
+          cLon += Math.cos(angle) * step; cLat += Math.sin(angle) * step * 0.7;
+          path.push([cLon, cLat]);
+        }
+        if (rng() > 0.4 && path.length > 2) {
+          var bi = 1 + Math.floor(rng() * (path.length - 2));
+          var ba = angle + (rng() - 0.5) * 2;
+          var bp = [path[bi].slice()]; var bLon = path[bi][0], bLat = path[bi][1];
+          for (var b = 0; b < 2 + Math.floor(rng() * 2); b++) {
+            ba += (rng() - 0.5) * 0.8;
+            bLon += Math.cos(ba) * (0.08 + rng() * 0.1);
+            bLat += Math.sin(ba) * (0.08 + rng() * 0.1) * 0.7;
+            bp.push([bLon, bLat]);
+          }
+          arms.push(bp);
+        }
+        arms.push(path);
+      }
+      return arms;
+    }
+
+    // ============================================
+    // DATA LOADING
+    // ============================================
+    async function loadData() {
+      var r = await Promise.all([
+        fetch('./data/us-states.geojson'), fetch('./data/sites.json'),
+        fetch('./data/site_weekly.json'), fetch('./data/state_cases_weekly.json'),
+        fetch('./data/region_weekly.json'), fetch('./data/region_order.json')
+      ]);
+      return {
+        states: await r[0].json(), sites: await r[1].json(),
+        siteWeekly: await r[2].json(), stateCases: await r[3].json(),
+        regionWeekly: await r[4].json(), regionOrder: await r[5].json()
+      };
+    }
+
+    // ============================================
+    // MAIN APP
+    // ============================================
+    async function init() {
+      var data = await loadData();
+      var states = data.states, sites = data.sites, siteWeekly = data.siteWeekly;
+      var stateCases = data.stateCases, regionWeekly = data.regionWeekly;
+      var regionOrder = data.regionOrder;
+
+      // Build lookups
+      var siteInfo = {}; sites.forEach(function(s) { siteInfo[s.wwtp_id] = s; });
+      var siteCracks = {}; sites.forEach(function(s) {
+        siteCracks[s.wwtp_id] = generateCrackPaths(s.lon, s.lat, s.wwtp_id * 7919);
+      });
+
+      // Build week -> site data lookup
+      var allWeekSet = {};
+      siteWeekly.forEach(function(d) { allWeekSet[d.week] = true; });
+      Object.keys(stateCases).forEach(function(w) { allWeekSet[w] = true; });
+      var masterWeeks = Object.keys(allWeekSet).sort();
+
+      var weekSiteData = {};
+      masterWeeks.forEach(function(w) { weekSiteData[w] = []; });
+      siteWeekly.forEach(function(d) {
+        var info = siteInfo[d.wwtp_id];
+        if (!info || !weekSiteData[d.week]) return;
+        weekSiteData[d.week].push({
+          wwtp_id: d.wwtp_id, lat: info.lat, lon: info.lon,
+          county_names: info.county_names, state: info.state,
+          population_served: info.population_served,
+          percentile: d.percentile, detect_prop: d.detect_prop, ptc_15d: d.ptc_15d
+        });
+      });
+
+      // ============================================
+      // STATE
+      // ============================================
+      var currentVariantId = 'delta';
+      var variantWeeks = [];   // weeks for current variant
+      var currentWeekIndex = 0;
+      var isPlaying = false, playInterval = null;
+      var speedMs = 1200; var speeds = [1200, 800, 400]; var speedLabels = ['1x','1.5x','3x']; var speedIndex = 0;
+      var isFlipped = false;    // false = Upside Down phase, true = normal/breach phase
+      var inUpsideDown = false; // true only after entry animation lands in upside down
+      var flipWeekIndex = 0;    // index in variantWeeks where flip happens
+      var narrativeTriggered = {};
+
+      // DOM
+      var mapContainer = document.getElementById('map-container');
+      var startOverlay = document.getElementById('start-overlay');
+      var narrativeOverlay = document.getElementById('narrative-overlay');
+      var narrativeText = document.getElementById('narrative-text');
+      var narrativeSubtext = document.getElementById('narrative-subtext');
+      var eventAnnotation = document.getElementById('event-annotation');
+      var eventText = document.getElementById('event-text');
+      var scrubber = document.getElementById('scrubber');
+      var playBtn = document.getElementById('play-btn');
+      var speedBtn = document.getElementById('speed-btn');
+      var currentDateEl = document.getElementById('current-date');
+      var activeSitesEl = document.getElementById('active-sites');
+      var phaseLabel = document.getElementById('phase-label');
+      var phaseDesc = document.getElementById('phase-desc');
+      var tooltip = document.getElementById('tooltip');
+      var dustCanvas = document.getElementById('dust-canvas');
+
+      // ============================================
+      // VARIANT SWITCHING
+      // ============================================
+      function loadVariant(variantId) {
+        pause();
+        currentVariantId = variantId;
+        var v = VARIANTS[variantId];
+
+        // Filter weeks to this variant's range
+        variantWeeks = masterWeeks.filter(function(w) { return w >= v.start && w <= v.end; });
+        currentWeekIndex = 0;
+
+        // Find flip index
+        flipWeekIndex = 0;
+        for (var i = 0; i < variantWeeks.length; i++) {
+          if (variantWeeks[i] >= v.flipDate) { flipWeekIndex = i; break; }
+        }
+
+        // Reset flip state
+        isFlipped = false;
+        inUpsideDown = false;
+        narrativeTriggered = {};
+        resetCrackSmoothing();
+
+        // Reset surface layer and scene tilt
+        var surface = document.getElementById('surface-layer');
+        var tilt = document.getElementById('scene-tilt');
+        surface.style.transition = 'none';
+        surface.style.opacity = '';
+        surface.className = '';
+        tilt.style.transition = 'none';
+        tilt.classList.remove('tilted');
+        setTimeout(function() {
+          surface.style.transition = '';
+          tilt.style.transition = '';
+        }, 50);
+
+        // Dust hidden until we enter upside down
+        dustCanvas.classList.add('fade-out');
+
+        // Hide ridgeline (will show during zoom)
+        ridgeManualHidden = false;
+        document.getElementById('ridgeline-container').classList.remove('visible');
+        document.getElementById('ridge-toggle').classList.remove('active');
+        document.getElementById('map-perspective').classList.remove('ridge-visible');
+
+        // Hide lead time annotation and toggle
+        document.getElementById('lead-time-annotation').classList.remove('visible');
+        document.getElementById('lead-time-toggle').classList.remove('show');
+
+        // Update scrubber
+        scrubber.max = variantWeeks.length - 1;
+        scrubber.value = 0;
+
+        // Update timeline labels
+        document.getElementById('tl-start').textContent = formatWeek(variantWeeks[0]);
+        var midIdx = Math.floor(variantWeeks.length / 2);
+        document.getElementById('tl-mid').textContent = formatWeek(variantWeeks[midIdx]);
+        document.getElementById('tl-end').textContent = formatWeek(variantWeeks[variantWeeks.length - 1]);
+
+        // Update active button
+        document.querySelectorAll('.variant-btn').forEach(function(btn) {
+          btn.classList.toggle('active', btn.dataset.variant === variantId);
+        });
+
+        // Reset camera
+        flyTo({ longitude: -96, latitude: 38, zoom: 3.5, pitch: 0, bearing: 0, duration: 1500 });
+
+        // Build ridgeline for this variant
+        buildRidgeline(v.start, v.end);
+
+        // Update flip marker position on scrubber
+        setTimeout(updateFlipMarker, 100);
+
+        updateFrame();
+      }
+
+      // ============================================
+      // HELPERS
+      // ============================================
+      function formatWeek(weekStr) {
+        var d = new Date(weekStr + 'T00:00:00');
+        var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      }
+
+      function formatShort(weekStr) {
+        var d = new Date(weekStr + 'T00:00:00');
+        var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return m[d.getMonth()] + ' ' + d.getFullYear();
+      }
+
+      function getFrameData() {
+        var week = variantWeeks[currentWeekIndex];
+        var thisWeek = weekSiteData[week] || [];
+        var activeIds = new Set(thisWeek.map(function(d) { return d.wwtp_id; }));
+        var lookback = 3, startIdx = Math.max(0, currentWeekIndex - lookback);
+        var recent = new Map();
+        for (var i = startIdx; i < currentWeekIndex; i++) {
+          var wd = weekSiteData[variantWeeks[i]] || [];
+          wd.forEach(function(d) {
+            if (!activeIds.has(d.wwtp_id)) recent.set(d.wwtp_id, Object.assign({}, d, { stale: true }));
+          });
+        }
+        var result = thisWeek.map(function(d) { return Object.assign({}, d, { stale: false }); });
+        recent.forEach(function(v) { result.push(v); });
+        return result;
+      }
+
+      function showNarrative(text, sub, duration, autoPause) {
+        narrativeText.textContent = text; narrativeSubtext.textContent = sub || '';
+        narrativeOverlay.classList.add('visible');
+        if (autoPause && isPlaying) {
+          pause();
+          if (duration) setTimeout(function() {
+            narrativeOverlay.classList.remove('visible');
+            play();
+          }, duration);
+        } else {
+          if (duration) setTimeout(function() { narrativeOverlay.classList.remove('visible'); }, duration);
+        }
+      }
+
+      function showEvent(text, duration) {
+        eventText.textContent = text; eventAnnotation.classList.add('visible');
+        if (duration) setTimeout(function() { eventAnnotation.classList.remove('visible'); }, duration);
+      }
+
+      function flyTo(opts) {
+        var viewOpts = Object.assign({}, opts, {
+          transitionDuration: opts.duration || 3000,
+          transitionInterpolator: new deck.FlyToInterpolator()
+        });
+        deckgl.setProps({ initialViewState: viewOpts });
+        if (surfaceDeck) {
+          surfaceDeck.setProps({ initialViewState: viewOpts });
+        }
+      }
+
+      // ============================================
+      // FLIP LOGIC — 3D Tilt with Z-Axis Separation
+      // ============================================
+      var surfaceLayer = document.getElementById('surface-layer');
+      var sceneTilt = document.getElementById('scene-tilt');
+
+      // Enter the Upside Down:
+      // 1) Tilt scene to 65deg (shows both maps from angle, void between)
+      // 2) Surface separates in Z (gap widens)
+      // 3) Surface flies away
+      // 4) Scene un-tilts back to 0deg (flat map with wastewater dots)
+      function enterUpsideDown(callback) {
+        surfaceLayer.className = '';
+        surfaceLayer.style.transition = '';
+        sceneTilt.classList.remove('tilted');
+
+        // Step 1: Tilt to reveal both layers
+        setTimeout(function() {
+          sceneTilt.classList.add('tilted');
+        }, 200);
+
+        // Step 2: Separate surface in Z-space (hold to show the void)
+        setTimeout(function() {
+          surfaceLayer.classList.add('separated');
+          dustCanvas.classList.remove('fade-out');
+        }, 2500);
+
+        // Step 3: Surface flies away
+        setTimeout(function() {
+          surfaceLayer.classList.remove('separated');
+          surfaceLayer.classList.add('gone');
+        }, 5000);
+
+        // Step 4: Un-tilt to flat view
+        setTimeout(function() {
+          sceneTilt.classList.remove('tilted');
+        }, 6500);
+
+        // Ready for playback
+        setTimeout(function() {
+          inUpsideDown = true;
+          if (callback) callback();
+        }, 8500);
+      }
+
+      // The Breach:
+      // 1) PAUSE playback — freeze the data
+      // 2) Tilt scene to show both layers
+      // 3) Surface (blue map) comes back — no cracks yet
+      // 4) Surface slams down on top of red map
+      // 5) Un-tilt flat
+      // 6) Set isFlipped = true — cracks START appearing now
+      // 7) Resume playback — viewer watches cracks grow
+      function doFlip() {
+        if (isFlipped) return;
+        inUpsideDown = false;
+        dustCanvas.classList.add('fade-out');
+
+        // Pause playback so data doesn't advance during animation
+        pause();
+
+        // Step 1: Tilt to reveal both layers
+        sceneTilt.classList.add('tilted');
+
+        // Step 2: Surface reappears, separated in Z
+        setTimeout(function() {
+          surfaceLayer.classList.remove('gone');
+          surfaceLayer.classList.add('separated');
+        }, 1500);
+
+        // Step 3: Surface slams down onto red map
+        setTimeout(function() {
+          surfaceLayer.classList.remove('separated');
+        }, 4000);
+
+        // Step 4: Un-tilt to flat
+        setTimeout(function() {
+          sceneTilt.classList.remove('tilted');
+        }, 5500);
+
+        // Step 5: NOW enable cracks and resume — viewer sees them grow from zero
+        setTimeout(function() {
+          isFlipped = true;
+          play();
+        }, 7500);
+      }
+
+      // Instant state set (for scrubber)
+      function setUpsideDownInstant() {
+        sceneTilt.style.transition = 'none';
+        sceneTilt.classList.remove('tilted');
+        surfaceLayer.style.transition = 'none';
+        surfaceLayer.className = 'gone';
+        setTimeout(function() {
+          sceneTilt.style.transition = '';
+          surfaceLayer.style.transition = '';
+        }, 50);
+      }
+
+      function setNormalInstant() {
+        sceneTilt.style.transition = 'none';
+        sceneTilt.classList.remove('tilted');
+        surfaceLayer.style.transition = 'none';
+        surfaceLayer.className = '';  // visible, flat on top showing cracks
+        setTimeout(function() {
+          sceneTilt.style.transition = '';
+          surfaceLayer.style.transition = '';
+        }, 50);
+      }
+
+      // ============================================
+      // DOT COLORS (wastewater)
+      // ============================================
+      function getDotColor(d) {
+        var alpha = d.stale ? 80 : 210;
+        var p = d.percentile;
+        if (p == null || isNaN(p)) {
+          // Use detect_prop as fallback
+          var dp = d.detect_prop;
+          if (dp != null && dp > 50) return [180, 30, 30, alpha];
+          return [150, 20, 20, 50];
+        }
+        var t = p / 100;
+        return [Math.floor(100 + t * 155), Math.floor(t * t * 80), Math.floor(t * t * 30), alpha];
+      }
+
+      function getDotGlowColor(d) {
+        if (d.stale) return [150, 20, 20, 8];
+        var p = d.percentile; if (p == null || isNaN(p)) return [150, 20, 20, 12];
+        var t = p / 100;
+        return [200, 20 + t * 30, 20, Math.floor(15 + t * 55)];
+      }
+
+      function getDotRadius(d) {
+        var base = Math.max(3000, Math.sqrt(d.population_served || 5000) * 50);
+        var p = d.percentile;
+        if (p == null || isNaN(p)) return base * 0.6;
+        return base * (0.5 + (p / 100) * 0.7);
+      }
+
+      function getGlowRadius(d) {
+        var base = Math.max(8000, Math.sqrt(d.population_served || 5000) * 120);
+        var p = d.percentile;
+        if (p == null || isNaN(p)) return base * 0.4;
+        return base * (0.3 + (p / 100) * 0.9);
+      }
+
+      // ============================================
+      // CRACK THRESHOLDS
+      // ============================================
+      var CRACK_START = 0.15, CRACK_FULL = 0.4;
+      function getCrackAmount(ci) {
+        if (ci <= CRACK_START) return 0; if (ci >= CRACK_FULL) return 1;
+        return (ci - CRACK_START) / (CRACK_FULL - CRACK_START);
+      }
+
+      // Smooth crack intensity per site (lerp between frames)
+      var crackSmoothing = {};
+      var SMOOTH_FACTOR = 0.3; // 0 = instant, 1 = never changes
+
+      function getSmoothedIntensity(siteId, targetIntensity) {
+        if (crackSmoothing[siteId] === undefined) {
+          crackSmoothing[siteId] = targetIntensity;
+          return targetIntensity;
+        }
+        // Lerp toward target
+        var prev = crackSmoothing[siteId];
+        var smoothed = prev + (targetIntensity - prev) * (1 - SMOOTH_FACTOR);
+        crackSmoothing[siteId] = smoothed;
+        return smoothed;
+      }
+
+      function resetCrackSmoothing() {
+        crackSmoothing = {};
+      }
+
+      // ============================================
+      // DECK.GL SETUP — Two transparent glass pane maps
+      // ============================================
+      var currentViewState = { longitude: -96, latitude: 38, zoom: 3.5, pitch: 0, bearing: 0 };
+
+      // Bottom layer (Upside Down) — red-toned, transparent background
+      var statesLayer = new deck.GeoJsonLayer({
+        id: 'us-states', data: states,
+        filled: true, stroked: true,
+        getFillColor: [15, 5, 5, 160],
+        getLineColor: [140, 40, 40, 220],
+        getLineWidth: 2, lineWidthMinPixels: 1.2, pickable: false
+      });
+
+      var deckgl = new deck.DeckGL({
+        container: 'map-container',
+        initialViewState: currentViewState,
+        controller: true, layers: [statesLayer],
+        parameters: { clearColor: [0, 0, 0, 1] },
+        onViewStateChange: function(e) {
+          currentViewState = e.viewState;
+          // Sync surface deck.gl to match
+          if (surfaceDeck) {
+            surfaceDeck.setProps({ initialViewState: Object.assign({}, e.viewState, { transitionDuration: 0 }) });
+          }
+          return e.viewState;
+        }
+      });
+
+      // Top layer (Normal World) — blue-gray toned, transparent background
+      var surfaceStatesLayer = new deck.GeoJsonLayer({
+        id: 'surface-states', data: states,
+        filled: true, stroked: true,
+        getFillColor: [12, 14, 22, 160],
+        getLineColor: [70, 85, 110, 200],
+        getLineWidth: 2, lineWidthMinPixels: 1.2, pickable: false
+      });
+
+      var surfaceDeck = new deck.DeckGL({
+        container: 'surface-layer',
+        initialViewState: currentViewState,
+        controller: false,
+        layers: [surfaceStatesLayer],
+        parameters: { clearColor: [0, 0, 0, 0] }
+      });
+
+      // ============================================
+      // UPDATE FRAME
+      // ============================================
+      function updateFrame() {
+        var week = variantWeeks[currentWeekIndex];
+        if (!week) return;
+        var frameData = getFrameData();
+        var caseData = stateCases[week] || {};
+        var v = VARIANTS[currentVariantId];
+
+        // UI updates
+        currentDateEl.textContent = formatWeek(week);
+        scrubber.value = currentWeekIndex;
+
+        // Counter: different info for each phase
+        if (inUpsideDown) {
+          activeSitesEl.textContent = frameData.filter(function(d) { return !d.stale; }).length + ' sites detecting';
+        } else if (isFlipped) {
+          // Count sites that have cracks
+          var breachedCount = 0;
+          var everActiveForCount = {};
+          for (var ci = 0; ci <= currentWeekIndex; ci++) {
+            var cwk = variantWeeks[ci];
+            var cwd = weekSiteData[cwk] || [];
+            cwd.forEach(function(d) { everActiveForCount[d.wwtp_id] = d.state; });
+          }
+          Object.keys(everActiveForCount).forEach(function(id) {
+            var st = everActiveForCount[id];
+            var sc = caseData[st];
+            if (sc && sc.case_intensity > 0.15) breachedCount++;
+          });
+          activeSitesEl.textContent = breachedCount + ' sites breached';
+        } else {
+          activeSitesEl.textContent = '';
+        }
+
+        // Phase indicator
+        if (inUpsideDown) {
+          phaseLabel.textContent = 'Detection'; phaseDesc.textContent = 'wastewater signals in the Upside Down';
+        } else if (isFlipped) {
+          phaseLabel.textContent = 'Outbreak'; phaseDesc.textContent = 'clinical cases break through';
+        } else {
+          phaseLabel.textContent = ''; phaseDesc.textContent = '';
+        }
+
+        // Lead time annotation elements
+        var leadTimeEl = document.getElementById('lead-time-annotation');
+        var leadTimeText = document.getElementById('lead-time-text');
+        var leadTimeToggleBtn = document.getElementById('lead-time-toggle');
+
+        // Narrative triggers
+        var pct = currentWeekIndex / variantWeeks.length;
+        var preFlipPct = flipWeekIndex > 0 ? currentWeekIndex / flipWeekIndex : 0;
+
+        // Act 1: Introduction — what are we looking at?
+        if (pct > 0.05 && !narrativeTriggered['intro']) {
+          narrativeTriggered['intro'] = true;
+          showNarrative(v.narrative[0], v.narrative[1], 4500, true);
+        }
+
+        // Act 1b: Rising signal — wastewater sites are lighting up
+        if (preFlipPct > 0.4 && preFlipPct < 1 && !narrativeTriggered['rising']) {
+          narrativeTriggered['rising'] = true;
+          if (v.risingSignal) {
+            showNarrative(v.risingSignal[0], v.risingSignal[1], 5000, true);
+          }
+        }
+
+        // Act 1c: Pre-breach tension — right before the flip
+        if (preFlipPct > 0.85 && preFlipPct < 1 && !narrativeTriggered['preBreach']) {
+          narrativeTriggered['preBreach'] = true;
+          if (v.preBreachText) {
+            showEvent(v.preBreachText, 6000);
+          }
+        }
+
+        // Act 2: The Breach
+        if (currentWeekIndex >= flipWeekIndex && !narrativeTriggered['flip']) {
+          narrativeTriggered['flip'] = true;
+          var breachText = v.breachNarrative || ['The breach', 'It breaks through to the surface'];
+          showNarrative(breachText[0], breachText[1], 5000);
+          setTimeout(doFlip, 1500);
+        }
+        // Early lead time (e.g. Omicron: show Oregon right after flip)
+        if (v.earlyLeadState && v.earlyLeadOffset != null &&
+            currentWeekIndex >= flipWeekIndex + v.earlyLeadOffset && !narrativeTriggered['earlyLead']) {
+          narrativeTriggered['earlyLead'] = true;
+          var earlyLT = v.leadTimes[v.earlyLeadState];
+          if (earlyLT) {
+            leadTimeText.innerHTML = '⚡ ' + earlyLT.label;
+            leadTimeEl.classList.add('visible');
+            leadTimeToggleBtn.classList.add('show');
+          }
+        }
+        // Mid-timeline: show all other states for variants with earlyLeadState
+        if (v.earlyLeadState) {
+          var midIdx = Math.floor(variantWeeks.length / 2);
+          if (currentWeekIndex >= midIdx && !narrativeTriggered['midLead']) {
+            narrativeTriggered['midLead'] = true;
+            var lines = [];
+            var otherStates = Object.keys(v.leadTimes)
+              .filter(function(st) { return st !== v.earlyLeadState; })
+              .sort(function(a, b) { return v.leadTimes[b].days - v.leadTimes[a].days; });
+            // Include early state at top
+            lines.push('⚡ ' + v.leadTimes[v.earlyLeadState].label);
+            otherStates.forEach(function(st) {
+              lines.push('⚡ ' + v.leadTimes[st].label);
+            });
+            leadTimeText.innerHTML = lines.join('<br>');
+            leadTimeEl.classList.add('visible');
+          }
+        }
+        if (currentWeekIndex >= flipWeekIndex + 4 && !narrativeTriggered['zoom']) {
+          narrativeTriggered['zoom'] = true;
+          flyTo(Object.assign({}, v.zoomTarget, { duration: 3000 }));
+          showRidgeline();
+
+          // Show insight narrative during zoom
+          if (v.insightNarrative) {
+            setTimeout(function() {
+              showNarrative(v.insightNarrative[0], v.insightNarrative[1], 6000);
+            }, 3500);
+          }
+
+          // Show zoom state's lead time (skip if earlyLeadState already handled it)
+          if (!v.earlyLeadState) {
+            setTimeout(function() {
+              if (!v.leadTimes || !v.zoomStateAbbrev) return;
+              var zoomLT = v.leadTimes[v.zoomStateAbbrev];
+              if (zoomLT) {
+                leadTimeText.innerHTML = '⚡ ' + zoomLT.label;
+              }
+              leadTimeEl.classList.add('visible');
+              leadTimeToggleBtn.classList.add('show');
+            }, 2500);
+          }
+        }
+        if (currentWeekIndex >= flipWeekIndex + 12 && !narrativeTriggered['pullback']) {
+          narrativeTriggered['pullback'] = true;
+          flyTo({ longitude: -96, latitude: 38, zoom: 3.5, pitch: 0, bearing: 0, duration: 3000 });
+          setTimeout(hideRidgeline, 2000);
+
+          // Show all states' lead times on zoom out (skip if earlyLeadState flow handles it)
+          if (!v.earlyLeadState) {
+            setTimeout(function() {
+              if (!v.leadTimes) return;
+              var lines = [];
+              if (v.zoomStateAbbrev && v.leadTimes[v.zoomStateAbbrev]) {
+                lines.push('⚡ ' + v.leadTimes[v.zoomStateAbbrev].label);
+              }
+              var otherStates = Object.keys(v.leadTimes)
+                .filter(function(st) { return st !== v.zoomStateAbbrev; })
+                .sort(function(a, b) { return v.leadTimes[b].days - v.leadTimes[a].days; });
+              otherStates.forEach(function(st) {
+                lines.push('⚡ ' + v.leadTimes[st].label);
+              });
+              leadTimeText.innerHTML = lines.join('<br>');
+              leadTimeEl.classList.add('visible');
+            }, 2000);
+          }
+        }
+        // Keep lead time toggle button accessible
+        var hideLeadAt = Math.min(flipWeekIndex + 16, variantWeeks.length - 4);
+        if (currentWeekIndex >= hideLeadAt && !narrativeTriggered['hideLead']) {
+          narrativeTriggered['hideLead'] = true;
+          leadTimeToggleBtn.classList.add('show');
+        }
+        // End narrative — closing summary (lead times stay visible)
+        if (currentWeekIndex >= variantWeeks.length - 3 && !narrativeTriggered['end']) {
+          narrativeTriggered['end'] = true;
+          if (v.endNarrative) {
+            showNarrative(v.endNarrative[0], v.endNarrative[1], 8000, true);
+          }
+        }
+
+        // === BUILD LAYERS ===
+        // Red map (bottom): always shows states + wastewater dots
+        var layers = [statesLayer];
+
+        if (frameData.length > 0) {
+          var glowLayer = new deck.ScatterplotLayer({
+            id: 'ww-glow', data: frameData,
+            getPosition: function(d) { return [d.lon, d.lat]; },
+            getRadius: function(d) { return getGlowRadius(d); },
+            getFillColor: function(d) { return getDotGlowColor(d); },
+            radiusMinPixels: 4, radiusMaxPixels: 40, pickable: false,
+            transitions: { getRadius: 200, getFillColor: 200 }
+          });
+          var dotLayer = new deck.ScatterplotLayer({
+            id: 'ww-dots', data: frameData,
+            getPosition: function(d) { return [d.lon, d.lat]; },
+            getRadius: function(d) { return getDotRadius(d); },
+            getFillColor: function(d) { return getDotColor(d); },
+            radiusMinPixels: 2, radiusMaxPixels: 15, pickable: true,
+            transitions: { getRadius: 200, getFillColor: 200 },
+            onHover: function(info) {
+              if (info.object) {
+                var o = info.object;
+                var pct = o.percentile != null ? o.percentile.toFixed(0) + '%' : 'N/A';
+                tooltip.style.display = 'block';
+                tooltip.style.left = (info.x + 12) + 'px'; tooltip.style.top = (info.y - 12) + 'px';
+                tooltip.innerHTML = '<strong>' + o.county_names + '</strong>, ' + o.state +
+                  '<br>Viral percentile: ' + pct + '<br>Phase: Detection';
+              } else tooltip.style.display = 'none';
+            }
+          });
+          layers.push(glowLayer, dotLayer);
+        }
+
+        deckgl.setProps({ layers: layers });
+
+        // Blue map (top): shows surface states + clinical cracks when breached
+        var surfLayers = [surfaceStatesLayer];
+
+        if (isFlipped) {
+          var crackPaths = [];
+
+          // Gather all sites ever active, tracking their peak wastewater signal
+          var everActive = {};
+          for (var wi = 0; wi <= currentWeekIndex; wi++) {
+            var wk = variantWeeks[wi];
+            var wd = weekSiteData[wk] || [];
+            wd.forEach(function(d) {
+              var info = siteInfo[d.wwtp_id];
+              if (!info) return;
+
+              var wwSignal = 0;
+              if (d.percentile != null && !isNaN(d.percentile)) {
+                wwSignal = d.percentile / 100;
+              } else if (d.detect_prop != null && !isNaN(d.detect_prop)) {
+                wwSignal = d.detect_prop / 100;
+              }
+
+              if (!everActive[d.wwtp_id]) {
+                everActive[d.wwtp_id] = {
+                  wwtp_id: d.wwtp_id, lat: info.lat, lon: info.lon,
+                  county_names: info.county_names, state: info.state,
+                  population_served: info.population_served,
+                  peakWW: wwSignal, totalWW: wwSignal, readings: 1
+                };
+              } else {
+                var site = everActive[d.wwtp_id];
+                if (wwSignal > site.peakWW) site.peakWW = wwSignal;
+                site.totalWW += wwSignal;
+                site.readings++;
+              }
+            });
+          }
+
+          Object.values(everActive).forEach(function(d) {
+            var sc = caseData[d.state];
+            var stateIntensity = (sc && sc.case_intensity) ? sc.case_intensity : 0;
+            var siteWeight = Math.max(0.1, d.peakWW);
+            var rawIntensity = stateIntensity * siteWeight;
+            var combinedIntensity = getSmoothedIntensity(d.wwtp_id, rawIntensity);
+            var ca = getCrackAmount(combinedIntensity);
+
+            if (ca > 0) {
+              var arms = siteCracks[d.wwtp_id]; if (!arms) return;
+              var numArms = Math.ceil(arms.length * ca * siteWeight);
+              numArms = Math.max(1, Math.min(arms.length, numArms));
+              for (var i = 0; i < numArms; i++) {
+                var fp = arms[i];
+                var reveal = Math.min(1, ca * 1.5 * siteWeight);
+                var pts = Math.max(2, Math.ceil(fp.length * reveal));
+                crackPaths.push({
+                  path: fp.slice(0, pts),
+                  intensity: combinedIntensity,
+                  siteWeight: siteWeight,
+                  ca: ca, state: d.state, county_names: d.county_names
+                });
+              }
+            }
+          });
+
+          if (crackPaths.length > 0) {
+            surfLayers.push(new deck.PathLayer({
+              id: 'crack-glow', data: crackPaths,
+              getPath: function(d) { return d.path; },
+              getColor: function(d) {
+                var sw = d.siteWeight || 0.5;
+                return [200, 50, 10, Math.floor((20 + d.intensity * 50) * sw)];
+              },
+              getWidth: function(d) {
+                var sw = d.siteWeight || 0.5;
+                return (8000 + d.intensity * 18000) * sw;
+              },
+              widthMinPixels: 2, widthMaxPixels: 16,
+              pickable: false, capRounded: true, jointRounded: true
+            }));
+            surfLayers.push(new deck.PathLayer({
+              id: 'crack-lines', data: crackPaths,
+              getPath: function(d) { return d.path; },
+              getColor: function(d) {
+                var t = d.intensity;
+                var sw = d.siteWeight || 0.5;
+                var alpha = Math.floor((120 + t * 80) * sw);
+                return [Math.floor(220+t*35), Math.floor(50+t*50), Math.floor(5+t*20), alpha];
+              },
+              getWidth: function(d) {
+                var sw = d.siteWeight || 0.5;
+                return (2000 + d.intensity * 5000) * sw;
+              },
+              widthMinPixels: 1, widthMaxPixels: 5,
+              pickable: true, capRounded: true, jointRounded: true,
+              onHover: function(info) {
+                if (info.object) {
+                  var o = info.object; var sc = caseData[o.state];
+                  tooltip.style.display = 'block';
+                  tooltip.style.left = (info.x+12)+'px'; tooltip.style.top = (info.y-12)+'px';
+                  tooltip.innerHTML = '<strong>' + o.county_names + '</strong>, ' + o.state +
+                    '<br>Weekly cases: ' + (sc && sc.new_cases ? sc.new_cases.toLocaleString() : 'N/A') +
+                    '<br>Surge: ' + Math.round(o.intensity * 100) + '%' +
+                    '<br>Site signal strength: ' + Math.round((o.siteWeight || 0) * 100) + '%' +
+                    '<br>Phase: Outbreak';
+                } else tooltip.style.display = 'none';
+              }
+            }));
+          }
+        }
+
+        surfaceDeck.setProps({ layers: surfLayers });
+
+        // Update ridgeline timeline marker
+        updateRidgelineMarker(week);
+      }
+
+      // ============================================
+      // RIDGELINE PLOT (D3)
+      // ============================================
+      var ridgeSvg = d3.select('#ridgeline-svg');
+      var ridgeMarkerLine = null;
+
+      function buildRidgeline(startDate, endDate) {
+        var container = document.getElementById('ridgeline-container');
+        var W = container.offsetWidth;
+        var H = container.offsetHeight;
+        var margin = { top: 30, right: 30, bottom: 22, left: 120 };
+
+        ridgeSvg.attr('width', W).attr('height', H)
+          .style('overflow', 'visible')
+          .selectAll('*').remove();
+
+        var filtered = regionWeekly.filter(function(d) {
+          return d.week >= startDate && d.week <= endDate && d.region;
+        });
+
+        var weeks = Array.from(new Set(filtered.map(function(d) { return d.week; }))).sort();
+        if (weeks.length === 0) return;
+
+        var x = d3.scaleLinear().domain([0, weeks.length - 1]).range([margin.left, W - margin.right]);
+        var weekToIdx = {}; weeks.forEach(function(w, i) { weekToIdx[w] = i; });
+
+        var visibleRegions = regionOrder.filter(function(r) {
+          return filtered.some(function(d) { return d.region === r; });
+        });
+
+        var pctCount = filtered.filter(function(d) { return d.mean_percentile != null; }).length;
+        var usePercentile = pctCount > filtered.length * 0.4;
+
+        function getWWValue(d) {
+          if (usePercentile && d.mean_percentile != null) return d.mean_percentile;
+          if (d.mean_detect_prop != null) return d.mean_detect_prop;
+          return 0;
+        }
+
+        var regionMaxWW = {}, regionMaxCases = {};
+        visibleRegions.forEach(function(r) {
+          var rd = filtered.filter(function(d) { return d.region === r; });
+          regionMaxWW[r] = d3.max(rd, function(d) { return getWWValue(d); }) || 1;
+          regionMaxCases[r] = d3.max(rd, function(d) { return d.total_cases; }) || 1;
+        });
+
+        var totalRows = visibleRegions.length;
+        var rowSpacing = (H - margin.top - margin.bottom) / (totalRows + 0.3);
+        var peakHeight = rowSpacing * 2.5;
+
+        function baseY(regionIdx) {
+          return margin.top + (regionIdx + 1) * rowSpacing;
+        }
+
+        // Store all region groups for hover interaction
+        var regionGroups = [];
+
+        // Draw top-to-bottom
+        for (var ri = 0; ri < visibleRegions.length; ri++) {
+          var region = visibleRegions[ri];
+          var by = baseY(ri);
+
+          var rData = filtered.filter(function(d) { return d.region === region; })
+            .sort(function(a, b) { return a.week < b.week ? -1 : 1; });
+
+          var wwPoints = rData.map(function(d) {
+            return { idx: weekToIdx[d.week], val: getWWValue(d) / regionMaxWW[region] };
+          });
+
+          var clPoints = rData.map(function(d) {
+            return { idx: weekToIdx[d.week], val: (d.total_cases || 0) / regionMaxCases[region] };
+          });
+
+          // Region group — all elements for this region
+          var g = ridgeSvg.append('g')
+            .attr('class', 'ridge-region')
+            .attr('data-region', region)
+            .style('cursor', 'pointer');
+
+          // Invisible wide hover target
+          g.append('rect')
+            .attr('x', margin.left).attr('y', by - peakHeight)
+            .attr('width', W - margin.left - margin.right)
+            .attr('height', peakHeight + 5)
+            .attr('fill', 'transparent');
+
+          // Wastewater area generators
+          var wwArea = d3.area()
+            .x(function(d) { return x(d.idx); })
+            .y0(by)
+            .y1(function(d) { return by - d.val * peakHeight; })
+            .curve(d3.curveBasis);
+
+          // Wastewater fill — monochrome dark
+          g.append('path').datum(wwPoints).attr('d', wwArea)
+            .attr('class', 'ridge-ww-fill')
+            .attr('fill', 'rgba(50, 20, 20, 0.2)')
+            .attr('stroke', 'none');
+
+          // Wastewater outline — monochrome muted
+          g.append('path').datum(wwPoints)
+            .attr('d', d3.line()
+              .x(function(d) { return x(d.idx); })
+              .y(function(d) { return by - d.val * peakHeight; })
+              .curve(d3.curveBasis))
+            .attr('class', 'ridge-ww-line')
+            .attr('fill', 'none')
+            .attr('stroke', '#442222')
+            .attr('stroke-width', 0.8);
+
+          // Clinical area
+          if (clPoints.length > 0 && regionMaxCases[region] > 100) {
+            var clArea = d3.area()
+              .x(function(d) { return x(d.idx); })
+              .y0(by)
+              .y1(function(d) { return by - d.val * peakHeight * 0.9; })
+              .curve(d3.curveBasis);
+
+            g.append('path').datum(clPoints).attr('d', clArea)
+              .attr('class', 'ridge-cl-fill')
+              .attr('fill', 'rgba(30, 30, 40, 0.1)')
+              .attr('stroke', 'none');
+
+            g.append('path').datum(clPoints)
+              .attr('d', d3.line()
+                .x(function(d) { return x(d.idx); })
+                .y(function(d) { return by - d.val * peakHeight * 0.9; })
+                .curve(d3.curveBasis))
+              .attr('class', 'ridge-cl-line')
+              .attr('fill', 'none')
+              .attr('stroke', '#383844')
+              .attr('stroke-width', 0.6)
+              .attr('stroke-dasharray', '6,3');
+          }
+
+          // Region label
+          var labelG = ridgeSvg.append('g')
+            .attr('class', 'ridge-label-group')
+            .attr('data-region', region)
+            .attr('transform', 'translate(0,' + by + ')')
+            .style('cursor', 'pointer');
+
+          labelG.append('text')
+            .attr('x', margin.left - 10)
+            .attr('y', -2)
+            .attr('text-anchor', 'end')
+            .attr('dominant-baseline', 'middle')
+            .attr('fill', '#444')
+            .attr('font-size', '11px')
+            .attr('font-family', 'Special Elite')
+            .attr('class', 'ridge-label-text')
+            .text(region);
+
+          regionGroups.push({ g: g, labelG: labelG, region: region });
+        }
+
+        // ============================================
+        // HOVER INTERACTION
+        // ============================================
+        function highlightRegion(targetRegion) {
+          regionGroups.forEach(function(rg) {
+            if (rg.region === targetRegion) {
+              // Highlight: red wastewater, cyan clinical
+              rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(200, 30, 30, 0.55)');
+              rg.g.selectAll('.ridge-ww-line').attr('stroke', '#dd2222').attr('stroke-width', 2);
+              rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(30, 150, 200, 0.3)');
+              rg.g.selectAll('.ridge-cl-line').attr('stroke', '#22bbdd').attr('stroke-width', 1.8);
+              rg.labelG.selectAll('.ridge-label-text').attr('fill', '#dd2222');
+            } else {
+              // Dim others
+              rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(50, 20, 20, 0.2)');
+              rg.g.selectAll('.ridge-ww-line').attr('stroke', '#442222').attr('stroke-width', 0.8);
+              rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(30, 30, 40, 0.1)');
+              rg.g.selectAll('.ridge-cl-line').attr('stroke', '#383844').attr('stroke-width', 0.6);
+              rg.labelG.selectAll('.ridge-label-text').attr('fill', '#444');
+            }
+          });
+        }
+
+        function resetHighlight() {
+          regionGroups.forEach(function(rg) {
+            rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(50, 20, 20, 0.2)');
+            rg.g.selectAll('.ridge-ww-line').attr('stroke', '#442222').attr('stroke-width', 0.8);
+            rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(30, 30, 40, 0.1)');
+            rg.g.selectAll('.ridge-cl-line').attr('stroke', '#383844').attr('stroke-width', 0.6);
+            rg.labelG.selectAll('.ridge-label-text').attr('fill', '#444');
+          });
+        }
+
+        // Attach hover events
+        regionGroups.forEach(function(rg) {
+          function onEnter() { highlightRegion(rg.region); }
+          function onLeave() { resetHighlight(); }
+          rg.g.on('mouseenter', onEnter).on('mouseleave', onLeave);
+          rg.labelG.on('mouseenter', onEnter).on('mouseleave', onLeave);
+        });
+
+        // Time marker
+        ridgeMarkerLine = ridgeSvg.append('line')
+          .attr('y1', -20).attr('y2', H)
+          .attr('x1', margin.left).attr('x2', margin.left)
+          .attr('stroke', '#ffffff').attr('stroke-width', 1)
+          .attr('opacity', 0.5);
+
+        // X-axis date labels
+        var numLabels = Math.min(6, weeks.length);
+        var labelStep = Math.floor(weeks.length / numLabels);
+        for (var li = 0; li < weeks.length; li += labelStep) {
+          var labelWeek = weeks[li];
+          var ld = new Date(labelWeek + 'T00:00:00');
+          var lMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          var labelText = lMonths[ld.getMonth()] + ' ' + ld.getFullYear();
+          ridgeSvg.append('text')
+            .attr('x', x(li))
+            .attr('y', H - 2)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#555')
+            .attr('font-size', '9px')
+            .attr('font-family', 'Special Elite')
+            .text(labelText);
+          ridgeSvg.append('line')
+            .attr('x1', x(li)).attr('x2', x(li))
+            .attr('y1', H - 12).attr('y2', H - 8)
+            .attr('stroke', '#443333').attr('stroke-width', 0.5);
+        }
+
+        // Legend
+        var lg = ridgeSvg.append('g').attr('transform', 'translate(' + (W - margin.right - 150) + ',' + (margin.top - 2) + ')');
+        lg.append('rect').attr('x', -6).attr('y', -10).attr('width', 158).attr('height', 40)
+          .attr('fill', 'rgba(10,5,5,0.85)').attr('rx', 3);
+        lg.append('line').attr('x1', 0).attr('x2', 16).attr('y1', -1).attr('y2', -1)
+          .attr('stroke', '#cc4444').attr('stroke-width', 2);
+        lg.append('text').attr('x', 20).attr('y', 3).attr('fill', '#cc4444')
+          .attr('font-size', '10px').attr('font-family', 'Special Elite')
+          .text(usePercentile ? 'Wastewater' : 'WW detection');
+        lg.append('line').attr('x1', 0).attr('x2', 16).attr('y1', 11).attr('y2', 11)
+          .attr('stroke', '#4488aa').attr('stroke-width', 2).attr('stroke-dasharray', '4,2');
+        lg.append('text').attr('x', 20).attr('y', 15).attr('fill', '#4488aa')
+          .attr('font-size', '10px').attr('font-family', 'Special Elite').text('Clinical');
+        lg.append('text').attr('x', 0).attr('y', 26).attr('fill', '#555')
+          .attr('font-size', '8px').attr('font-family', 'Special Elite').text('Hover a region to reveal');
+
+        ridgeSvg._xScale = x;
+        ridgeSvg._weekToIdx = weekToIdx;
+      }
+
+      function updateRidgelineMarker(week) {
+        if (!ridgeMarkerLine || !ridgeSvg._xScale || !ridgeSvg._weekToIdx) return;
+        var idx = ridgeSvg._weekToIdx[week];
+        if (idx !== undefined) {
+          var xPos = ridgeSvg._xScale(idx);
+          ridgeMarkerLine.attr('x1', xPos).attr('x2', xPos);
+        }
+      }
+
+      // ============================================
+      // DUST PARTICLES
+      // ============================================
+      var dustCtx = dustCanvas.getContext('2d');
+      var particles = [];
+
+      function resizeDust() { dustCanvas.width = dustCanvas.offsetWidth; dustCanvas.height = dustCanvas.offsetHeight; }
+      resizeDust(); window.addEventListener('resize', resizeDust);
+
+      for (var i = 0; i < 150; i++) {
+        particles.push({
+          x: Math.random() * dustCanvas.width, y: Math.random() * dustCanvas.height,
+          size: 0.3 + Math.random() * 2.0,
+          sx: (Math.random() - 0.5) * 0.25, sy: -0.05 - Math.random() * 0.3,
+          opacity: 0.08 + Math.random() * 0.3,
+          phase: Math.random() * Math.PI * 2,
+          rot: Math.random() * Math.PI * 2, rotS: (Math.random() - 0.5) * 0.01,
+          stretch: 0.5 + Math.random() * 1.5
+        });
+      }
+
+      function animateDust() {
+        dustCtx.clearRect(0, 0, dustCanvas.width, dustCanvas.height);
+        var t = Date.now() * 0.001;
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
+          p.x += p.sx + Math.sin(t * 0.7 + p.phase) * 0.12;
+          p.y += p.sy + Math.cos(t * 0.5 + p.phase) * 0.08;
+          p.rot += p.rotS;
+          if (p.y < -10) { p.y = dustCanvas.height + 10; p.x = Math.random() * dustCanvas.width; }
+          if (p.x < -10) p.x = dustCanvas.width + 10;
+          if (p.x > dustCanvas.width + 10) p.x = -10;
+          var fl = 0.6 + 0.4 * Math.sin(t * 1.2 + p.phase);
+          var a = p.opacity * fl;
+          dustCtx.save();
+          dustCtx.translate(p.x, p.y);
+          dustCtx.rotate(p.rot);
+          var g = 180 + Math.floor(Math.random() * 40);
+          dustCtx.beginPath();
+          dustCtx.ellipse(0, 0, p.size * p.stretch, p.size, 0, 0, Math.PI * 2);
+          dustCtx.fillStyle = 'rgba(' + g + ',' + (g - 10) + ',' + (g - 20) + ',' + a + ')';
+          dustCtx.fill();
+          if (p.size > 1.0) {
+            dustCtx.beginPath();
+            dustCtx.ellipse(0, 0, p.size * p.stretch * 3, p.size * 2.5, 0, 0, Math.PI * 2);
+            dustCtx.fillStyle = 'rgba(200,195,190,' + (a * 0.06) + ')';
+            dustCtx.fill();
+          }
+          dustCtx.restore();
+        }
+        requestAnimationFrame(animateDust);
+      }
+      animateDust();
+
+      // ============================================
+      // PLAYBACK
+      // ============================================
+      function play() {
+        if (isPlaying) return;
+        isPlaying = true; playBtn.innerHTML = '&#9646;&#9646;';
+        playInterval = setInterval(function() {
+          currentWeekIndex++;
+          if (currentWeekIndex >= variantWeeks.length) {
+            currentWeekIndex = variantWeeks.length - 1;
+            pause();
+            return;
+          }
+          updateFrame();
+        }, speedMs);
+      }
+
+      function pause() {
+        isPlaying = false; playBtn.innerHTML = '&#9654;';
+        if (playInterval) { clearInterval(playInterval); playInterval = null; }
+      }
+
+      playBtn.addEventListener('click', function() { if (isPlaying) pause(); else play(); });
+
+      scrubber.addEventListener('input', function() {
+        pause();
+        currentWeekIndex = parseInt(scrubber.value);
+        if (currentWeekIndex >= flipWeekIndex && !isFlipped) {
+          isFlipped = true;
+          inUpsideDown = false;
+          setNormalInstant();
+          dustCanvas.classList.add('fade-out');
+        }
+        if (currentWeekIndex < flipWeekIndex && isFlipped) {
+          isFlipped = false;
+          inUpsideDown = true;
+          setUpsideDownInstant();
+          dustCanvas.classList.remove('fade-out');
+        }
+        // If before flip and never entered, still show upside down
+        if (currentWeekIndex < flipWeekIndex && !isFlipped) {
+          inUpsideDown = true;
+          setUpsideDownInstant();
+          dustCanvas.classList.remove('fade-out');
+        }
+        updateFrame();
+      });
+
+      speedBtn.addEventListener('click', function() {
+        speedIndex = (speedIndex + 1) % speeds.length;
+        speedMs = speeds[speedIndex]; speedBtn.textContent = speedLabels[speedIndex];
+        if (isPlaying) { pause(); play(); }
+      });
+
+      // Ridgeline show/hide
+      var ridgeContainer = document.getElementById('ridgeline-container');
+      var ridgeToggle = document.getElementById('ridge-toggle');
+      var ridgeManualHidden = false;  // user explicitly toggled off
+
+      function showRidgeline() {
+        if (ridgeManualHidden) return;
+        ridgeContainer.classList.add('visible');
+        ridgeToggle.classList.add('active');
+        document.getElementById('map-perspective').classList.add('ridge-visible');
+        // Trigger deck.gl resize after CSS transition completes
+        setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 1600);
+      }
+
+      function hideRidgeline() {
+        ridgeContainer.classList.remove('visible');
+        ridgeToggle.classList.remove('active');
+        document.getElementById('map-perspective').classList.remove('ridge-visible');
+        setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 1600);
+      }
+
+      ridgeToggle.addEventListener('click', function() {
+        if (ridgeContainer.classList.contains('visible')) {
+          hideRidgeline();
+          ridgeManualHidden = true;
+        } else {
+          ridgeManualHidden = false;
+          showRidgeline();
+        }
+      });
+
+      // ============================================
+      // FLIP MARKER ON SCRUBBER
+      // ============================================
+      var flipMarker = document.getElementById('flip-marker');
+      var scrubberWrapper = document.getElementById('scrubber-wrapper');
+
+      function updateFlipMarker() {
+        if (variantWeeks.length === 0) return;
+        var pct = (flipWeekIndex / variantWeeks.length) * 100;
+        // Account for thumb width offset
+        var wrapperWidth = scrubberWrapper.offsetWidth;
+        var thumbHalf = 7; // half of thumb width
+        var usable = wrapperWidth - thumbHalf * 2;
+        var px = thumbHalf + (pct / 100) * usable;
+        flipMarker.style.left = px + 'px';
+      }
+
+      // Update marker when variant loads or window resizes
+      window.addEventListener('resize', updateFlipMarker);
+
+      // ============================================
+      // ALIGN TIMELINE DATES UNDER SCRUBBER
+      // ============================================
+      var timelineDates = document.getElementById('timeline-dates');
+
+      function alignTimelineDates() {
+        var controls = document.getElementById('timeline-controls');
+        var wrapper = document.getElementById('scrubber-wrapper');
+        if (!controls || !wrapper) return;
+        var controlsRect = controls.getBoundingClientRect();
+        var wrapperRect = wrapper.getBoundingClientRect();
+        var leftPad = wrapperRect.left - controlsRect.left;
+        var rightPad = controlsRect.right - wrapperRect.right;
+        timelineDates.style.paddingLeft = leftPad + 'px';
+        timelineDates.style.paddingRight = rightPad + 'px';
+      }
+
+      alignTimelineDates();
+      window.addEventListener('resize', alignTimelineDates);
+
+      // ============================================
+      // AUDIO CONTROLS
+      // ============================================
+      var bgAudio = document.getElementById('bg-audio');
+      var audioToggle = document.getElementById('audio-toggle');
+      var audioPlaying = false;
+
+      bgAudio.volume = 0.3;
+
+      audioToggle.addEventListener('click', function() {
+        if (audioPlaying) {
+          bgAudio.pause();
+          audioPlaying = false;
+          audioToggle.textContent = '🔇';
+          audioToggle.classList.remove('active');
+        } else {
+          bgAudio.play().catch(function() {});
+          audioPlaying = true;
+          audioToggle.textContent = '🔊';
+          audioToggle.classList.add('active');
+        }
+      });
+
+      // ============================================
+      // INFO PANEL
+      // ============================================
+      var infoPanel = document.getElementById('info-panel');
+      var infoToggle = document.getElementById('info-toggle');
+
+      infoToggle.addEventListener('click', function() {
+        infoPanel.classList.add('visible');
+        pause();
+      });
+
+      document.getElementById('info-close').addEventListener('click', function() {
+        infoPanel.classList.remove('visible');
+      });
+
+      // ============================================
+      // LEAD TIME TOGGLE (lightning bolt)
+      // ============================================
+      var ltToggle = document.getElementById('lead-time-toggle');
+      var ltData = null; // stored lead time HTML for re-showing
+
+      ltToggle.addEventListener('click', function() {
+        var ltEl = document.getElementById('lead-time-annotation');
+        if (ltEl.classList.contains('visible')) {
+          ltEl.classList.remove('visible');
+        } else {
+          ltEl.classList.add('visible');
+        }
+      });
+
+      // ============================================
+      // TIMELINE CONTROLS DISABLE/ENABLE
+      // ============================================
+      var timelineControls = document.getElementById('timeline-controls');
+      timelineControls.classList.add('disabled');
+
+      function enableControls() {
+        timelineControls.classList.remove('disabled');
+      }
+
+      function disableControls() {
+        timelineControls.classList.add('disabled');
+      }
+
+      // Variant buttons — just load data, don't start animation
+      document.querySelectorAll('.variant-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          disableControls();
+          pause();
+          loadVariant(btn.dataset.variant);
+          updateFrame();
+
+          // Show start overlay if not already visible
+          startOverlay.classList.remove('hidden');
+        });
+      });
+
+      // Start screen — triggers entry animation for whichever variant is loaded
+      startOverlay.addEventListener('click', function() {
+        startOverlay.classList.add('hidden');
+        setTimeout(function() {
+          updateFrame();
+          setTimeout(function() {
+            enterUpsideDown(function() {
+              enableControls();
+              play();
+            });
+          }, 800);
+        }, 300);
+      });
+
+      // Initial load (normal orientation, waiting for user)
+      loadVariant('delta');
+      console.log('Upside Down ready.');
+    }
+
+    init().catch(function(err) { console.error('Init failed:', err); });
+  </script>
+</body>
+</html>
