@@ -16,8 +16,8 @@ This visualization renders two transparent deck.gl map layers — a red wastewat
 1. Clone the repository:
 
 ```bash
-git clone git@git.uwaterloo.ca:genai4h/products/can-view.git
-cd project
+git clone https://github.com/jaciejermier/the-upside-down.git
+cd the-upside-down
 ```
 
 2. Start a local server:
@@ -28,17 +28,21 @@ python -m http.server 8080
 
 3. Open your browser and navigate to:
 
-```
-http://localhost:8080/project
-```
+- **Visualization:** `http://localhost:8080/project`
+- **Pictorial:** `http://localhost:8080/project/pictorial.html`
 
 4. Click **"Enter the Upside Down"** to begin the guided animation.
+
+## Viewing the Pictorial
+
+The pictorial is a VISAP-format visual essay documenting the design process and visual encoding decisions. To view it, navigate to `http://localhost:8080/project/pictorial.html` in Chrome. To export as PDF, press `Ctrl+P`, set margins to **None**, and select **Save as PDF**.
 
 ## Project Structure
 
 ```
 project/
 ├── index.html              # Main visualization (single-page application)
+├── pictorial.html          # VISAP pictorial (visual design essay)
 ├── data/
 │   ├── us-states.geojson   # U.S. state boundaries
 │   ├── sites.json          # Wastewater treatment plant locations
@@ -47,7 +51,7 @@ project/
 │   ├── region_weekly.json  # Regional aggregations for ridgeline plot
 │   └── region_order.json   # Region display ordering
 └── audio/
-    └── stranger-things-theme.mp3  # Optional background audio
+    └── stranger-things-theme.mp3  # Did not end up including audio 
 ```
 
 ## Usage
