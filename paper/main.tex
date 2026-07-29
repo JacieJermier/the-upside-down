@@ -1,0 +1,250 @@
+%% SciFi-VIS 2026 submission, position paper
+%% Uses the official IEEE VGTC conference class (vgtc.cls).
+%% See README_OVERLEAF.md for setup steps.
+
+\documentclass{vgtc}                % conference style, final (not double-blind)
+%\documentclass[review]{vgtc}       % use if the workshop switches to blind review
+
+\usepackage{times}
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\renewcommand*\ttdefault{txtt}
+
+\onlineid{0}
+\vgtccategory{Research}
+\vgtcinsertpkg
+
+%% ---------------------------------------------------------------------------
+\title{Structure Before Style. Choosing a Science Fiction Frame\\ That Matches the Data}
+
+\author{Jacie Jermier\thanks{jjermier@uwaterloo.ca}\\ %
+        \scriptsize University of Waterloo}
+
+\abstract{%
+Wastewater surveillance can detect SARS-CoV-2 outbreaks days to weeks before
+clinical case counts rise, yet existing public-facing dashboards communicate this
+lead time through static line charts and choropleth maps. We present \emph{The
+Upside Down}, a narrative visualization that uses a \emph{Stranger Things}
+inspired figurative frame to make the lead-lag relationship between wastewater
+signals and clinical cases intuitively accessible. We argue that a science
+fiction frame should be chosen for how well its structure maps onto the data
+relationship, not for whether the theme feels relevant. Testing our own frame
+against computed lead times forced us to drop our most dramatic variant wave and
+to show a region where the early warning story is false.%
+}
+
+\keywords{Narrative visualization, figurative frames, science fiction,
+wastewater surveillance, early warning.}
+
+%% Teaser is Figure 1, the 65 degree tilt with both layers separated.
+%% Upload the image, then swap the placeholder below for the \includegraphics line.
+\teaser{
+  \centering
+  % \includegraphics[width=\linewidth]{figs/fig1-tilt}
+  \fbox{\parbox[c][1.5in][c]{\linewidth}{\centering\textsf{[Fig.~1, 65 degree tilt with both layers separated in Z]}}}
+  \caption{The core visual metaphor. The scene tilts to 65 degrees, revealing two
+  transparent map layers stacked in Z-space. The blue surface layer is the
+  visible clinical world. The red layer underneath is the Upside Down, where
+  wastewater detects viral signals before hospitals see a surge.}
+  \label{fig:teaser}
+}
+%% ---------------------------------------------------------------------------
+
+\begin{document}
+\maketitle
+
+\section{Position}
+
+Infected individuals shed SARS-CoV-2 RNA into wastewater before symptoms appear
+and before they seek testing~\cite{daoust2021,peccia2020}. Public health
+authorities can therefore detect outbreaks days to weeks earlier than
+hospital-based reporting allows~\cite{kumar2022}.
+
+Existing visualizations of wastewater surveillance have remained limited to
+time-series overlays and choropleth maps. These representations are analytically
+useful for experts but fail to show what makes this data so compelling. The virus
+was detectable underground days to weeks before it ever showed up in hospitals.
+
+The \emph{Stranger Things} metaphor fits here because viewers already understand
+the show's central concept of a parallel dimension occupying the same physical
+space.
+
+Our position is that figurative frames in visualization are not merely aesthetic
+choices but structural decisions that shape how viewers interpret data
+relationships~\cite{byrne2019}. The Upside Down metaphor does not just decorate
+the lead-lag relationship. It makes that relationship spatial by placing the
+virus below in wastewater before it appears above in hospitals. Choosing a
+metaphor should be driven by how well the metaphor's structure maps onto the data
+relationship, not just whether the theme feels relevant.
+
+That claim gives us a way to test a frame. If the metaphor really does encode the
+relationship, it should visibly break wherever the data stops holding.
+
+\section{System}
+
+The core visual metaphor uses two transparent deck.gl map layers rendered inside
+a shared 3D scene. The bottom layer, the Upside Down, renders U.S. state outlines
+in red, overlaid with wastewater detection dots whose radius and brightness
+encode viral RNA percentile intensity and population served
+(Fig.~\ref{fig:detection}). The top layer, the surface, renders identical
+outlines in blue, overlaid with procedurally generated crack paths whose severity
+encodes clinical case intensity weighted by the wastewater signal at each site.
+This means the places where wastewater detected the most virus are the places
+that crack hardest when clinical cases arrive. When the scene is flat the two
+layers overlap perfectly. When tilted to 65 degrees they separate in Z-space,
+revealing the void between the two worlds (Fig.~\ref{fig:teaser}).
+
+A D3.js ridgeline plot stacks regional rows. Each row contains a filled
+wastewater curve in red and a dashed clinical curve in blue, and the horizontal
+displacement between their peaks directly encodes the lead time for that region
+(Fig.~\ref{fig:ridge}).
+
+Our design follows Segel and Heer's martini glass structure~\cite{segel2010}. The
+lead-lag relationship only makes sense if the viewer first sees the wastewater
+phase before the clinical phase.
+
+\begin{figure}[t]
+  \centering
+  % \includegraphics[width=\columnwidth]{figs/fig2-detection}
+  \fbox{\parbox[c][1.1in][c]{0.96\columnwidth}{\centering\textsf{[Fig.~2, Omicron detection phase]}}}
+  \caption{During the detection phase, wastewater sampling sites appear as
+  glowing red dots. At this point hospitals have not yet registered the coming
+  surge.}
+  \label{fig:detection}
+\end{figure}
+
+\section{Testing the Frame}
+
+Lead time values in our first version were conservative manual estimates rather
+than statistically computed values. We replaced them with a cross-correlation of
+weekly wastewater percentile against weekly clinical cases. Two things came out
+of that.
+
+The first is that the Delta wave had to be removed. CDC NWSS percentile reporting
+does not begin until 15 November 2021, so the entire Delta window contains no
+viral intensity data. Delta had been our flagship wave and it carried most of our
+figures. The visualization had been rendering it confidently the whole time.
+Nothing in the design forced the metaphor to break, which is the exact failure we
+are warning about.
+
+The second is that wastewater surveillance does not produce a clean and uniform
+lead time across every state and region (Table~\ref{tab:leads}). Idaho led
+Omicron by three weeks and Arizona led BA.5 by two. West Virginia led neither.
+Its correlation peaks at lag 0 in both waves, which means the wastewater signal
+and the clinical signal move together. There is no underground.
+
+\begin{table}[t]
+  \centering
+  \caption{Lead times from cross-correlation of weekly wastewater viral
+  percentile against weekly clinical cases. A value of none means the correlation
+  peaks at lag 0.}
+  \label{tab:leads}
+  \begin{tabular}{llcc}
+    \toprule
+    Region or state & Wave & Lead & $r$ \\
+    \midrule
+    Southwest      & BA.5    & 2 weeks       & 0.97 \\
+    Upper Midwest  & Omicron & 2 weeks       & 0.82 \\
+    Upper Midwest  & BA.5    & 2 weeks       & 0.81 \\
+    Idaho          & Omicron & 3 weeks       & 0.99 \\
+    Appalachian    & Omicron & \textbf{none} & 0.95 \\
+    West Virginia  & BA.5    & \textbf{none} & 0.92 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+This unevenness is not a flaw in the visualization but a reflection of the
+real-world variability documented by Kumar et al.~\cite{kumar2022}. We now show
+Appalachia and West Virginia rather than leaving them out
+(Fig.~\ref{fig:counter}). In those rows the two curves sit on top of each other
+and the layers have nothing to separate. The frame fails in public, which is the
+strongest evidence we have that it was encoding something real.
+
+\begin{figure}[t]
+  \centering
+  % \includegraphics[width=\columnwidth]{figs/fig3-ridge-uppermidwest}
+  \fbox{\parbox[c][1.0in][c]{0.96\columnwidth}{\centering\textsf{[Fig.~3, ridgeline with Upper Midwest highlighted]}}}
+  \caption{The ridgeline plot with the Upper Midwest region highlighted on hover.
+  The horizontal gap between peaks is the two week lead.}
+  \label{fig:ridge}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  % \includegraphics[width=\columnwidth]{figs/fig4-ridge-appalachian}
+  \fbox{\parbox[c][1.0in][c]{0.96\columnwidth}{\centering\textsf{[Fig.~4, ridgeline with Appalachian highlighted]}}}
+  \caption{The counterexample. With Appalachian highlighted the two curves are
+  coincident. No gap, no lead time, nothing for the layers to separate.}
+  \label{fig:counter}
+\end{figure}
+
+\section{Discussion}
+
+\textbf{Pick frames by structural correspondence rather than thematic fit.} Many
+stories are epidemiologically evocative. Almost none of them place a hidden layer
+beneath a visible one in the same physical space, and that property is what does
+the work here.
+
+\textbf{A speculative frame should be able to fail.} Our metaphor's credibility
+rests on the regions where it does not hold. A speculative interface that cannot
+fail against real data is closer to concept art, which is valuable but a
+different contribution.
+
+\textbf{A fiction carries its source's blind spots.} The Upside Down implies that
+the underground always knows first. Before late 2021 there was no underground to
+look at because the sensors had not been installed yet. A frame that cannot
+express the absence of instrumentation will quietly imply coverage that never
+existed.
+
+\section{Limitations}
+
+Lead times are computed from aggregated weekly series, and sewer transit time and
+sampling frequency are not modeled~\cite{kumar2022}. Temporal coverage spans
+Omicron and BA.5 only. The 3D tilt effect requires a modern browser with
+hardware-accelerated CSS transforms and WebGL support, which excludes older
+devices and some mobile browsers. We report correlations rather than causal lead
+estimates.
+
+%% ---------------------------------------------------------------------------
+%% Manual bibliography, so no .bib file or BibTeX pass is needed.
+\begin{thebibliography}{9}
+
+\bibitem{byrne2019}
+L.~Byrne, D.~Angus, and J.~Wiles.
+\newblock Figurative frames. A critical vocabulary for images in information
+  visualization.
+\newblock {\em Information Visualization}, 18(1):45--67, 2019.
+
+\bibitem{cdc2026}
+Centers for Disease Control and Prevention.
+\newblock {NWSS} public {SARS-CoV-2} wastewater metric data, 2026.
+\newblock Accessed 16 Feb 2026.
+
+\bibitem{daoust2021}
+P.~M. D'Aoust et~al.
+\newblock Catching a resurgence. Increase in {SARS-CoV-2} viral {RNA} identified
+  in wastewater 48\,h before {COVID-19} clinical tests.
+\newblock {\em Science of the Total Environment}, 770:145319, 2021.
+
+\bibitem{kumar2022}
+M.~Kumar, A.~K. Srivastava, and N.~Srivastava.
+\newblock Lead time of early warning by wastewater surveillance for
+  {COVID-19}.
+\newblock {\em Chemical Engineering Journal}, 441:135936, 2022.
+
+\bibitem{peccia2020}
+J.~Peccia et~al.
+\newblock Measurement of {SARS-CoV-2} {RNA} in wastewater tracks community
+  infection dynamics.
+\newblock {\em Nature Biotechnology}, 38(10):1164--1167, 2020.
+
+\bibitem{segel2010}
+E.~Segel and J.~Heer.
+\newblock Narrative visualization. Telling stories with data.
+\newblock {\em IEEE Transactions on Visualization and Computer Graphics},
+  16(6):1139--1148, 2010.
+
+\end{thebibliography}
+
+\end{document}

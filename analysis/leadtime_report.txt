@@ -1,0 +1,30 @@
+variant   region           lag*       r    n  peak-gap  quality
+--------------------------------------------------------------------------
+Delta     Pacific NW         --      --    3        --  series too short
+Delta     Mountain           --      --    3        --  series too short
+Delta     Upper Midwest      --      --    0        --  insufficient data
+Delta     Lower Midwest      --      --    3        --  series too short
+Delta     Northeast          --      --    0        --  insufficient data
+Delta     Appalachian        --      --    3        --  series too short
+Delta     Southeast          --      --    0        --  insufficient data
+Delta     Southwest          --      --    2        --  series too short
+
+Omicron   Pacific NW          1   0.819   23         1 weeks  moderate
+Omicron   Mountain            1   0.779   23         1 weeks  STRONG
+Omicron   Upper Midwest       2   0.825   14         0 weeks  STRONG
+Omicron   Lower Midwest       2   0.735   22         3 weeks  STRONG
+Omicron   Northeast           1   0.214   16       -16 weeks  weak
+Omicron   Appalachian         0   0.945   24         1 weeks  no lead (synchronous)
+Omicron   Southeast           0   0.351   12        11 weeks  no lead (synchronous)
+Omicron   Southwest           4   0.663   19         3 weeks  STRONG
+
+BA.5      Pacific NW          0   0.893   27         1 weeks  no lead (synchronous)
+BA.5      Mountain            0   0.684   27         4 weeks  no lead (synchronous)
+BA.5      Upper Midwest       2   0.805   25       -10 weeks  STRONG
+BA.5      Lower Midwest       1   0.880   26         1 weeks  moderate
+BA.5      Northeast           8   0.010   19        11 weeks  weak
+BA.5      Appalachian         0   0.408   27         0 weeks  no lead (synchronous)
+BA.5      Southeast           1   0.891   26        12 weeks  STRONG
+BA.5      Southwest           2   0.970   25         0 weeks  STRONG
+
+wrote leadtime_results.json

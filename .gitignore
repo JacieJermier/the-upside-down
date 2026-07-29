@@ -1,3 +1,9 @@
 *.mp4
 *.pptx
 *.pdf
+
+# Unused local audio. The score is synthesised in index.html, no file needed.
+*.mp3
+
+# Office lock files
+~$*

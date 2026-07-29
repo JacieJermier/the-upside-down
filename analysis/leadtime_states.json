@@ -1,0 +1,174 @@
+{
+  "Omicron": {
+    "lead": [
+      {
+        "state": "TX",
+        "name": "Texas",
+        "lag": 5,
+        "r": 0.955,
+        "gain": 0.363,
+        "n": 12
+      },
+      {
+        "state": "ID",
+        "name": "Idaho",
+        "lag": 3,
+        "r": 0.991,
+        "gain": 0.183,
+        "n": 17
+      },
+      {
+        "state": "MT",
+        "name": "Montana",
+        "lag": 2,
+        "r": 0.809,
+        "gain": 0.205,
+        "n": 23
+      },
+      {
+        "state": "IL",
+        "name": "Illinois",
+        "lag": 1,
+        "r": 0.904,
+        "gain": 0.25,
+        "n": 14
+      },
+      {
+        "state": "WI",
+        "name": "Wisconsin",
+        "lag": 1,
+        "r": 0.887,
+        "gain": 0.1,
+        "n": 16
+      },
+      {
+        "state": "NV",
+        "name": "Nevada",
+        "lag": 1,
+        "r": 0.746,
+        "gain": 0.083,
+        "n": 24
+      }
+    ],
+    "synchronous": [
+      {
+        "state": "WV",
+        "name": "West Virginia",
+        "lag": 0,
+        "r": 0.945,
+        "gain": 0.0,
+        "n": 24
+      }
+    ]
+  },
+  "BA.5": {
+    "lead": [
+      {
+        "state": "PA",
+        "name": "Pennsylvania",
+        "lag": 5,
+        "r": 0.889,
+        "gain": 0.051,
+        "n": 11
+      },
+      {
+        "state": "NJ",
+        "name": "New Jersey",
+        "lag": 4,
+        "r": 0.909,
+        "gain": 1.216,
+        "n": 11
+      },
+      {
+        "state": "ID",
+        "name": "Idaho",
+        "lag": 2,
+        "r": 0.919,
+        "gain": 0.397,
+        "n": 30
+      },
+      {
+        "state": "AZ",
+        "name": "Arizona",
+        "lag": 2,
+        "r": 0.849,
+        "gain": 0.06,
+        "n": 30
+      },
+      {
+        "state": "GA",
+        "name": "Georgia",
+        "lag": 1,
+        "r": 0.924,
+        "gain": 0.053,
+        "n": 28
+      }
+    ],
+    "synchronous": [
+      {
+        "state": "AL",
+        "name": "Alabama",
+        "lag": 0,
+        "r": 0.97,
+        "gain": 0.0,
+        "n": 10
+      },
+      {
+        "state": "FL",
+        "name": "Florida",
+        "lag": 0,
+        "r": 0.924,
+        "gain": 0.0,
+        "n": 29
+      },
+      {
+        "state": "WV",
+        "name": "West Virginia",
+        "lag": 0,
+        "r": 0.92,
+        "gain": 0.0,
+        "n": 30
+      },
+      {
+        "state": "CO",
+        "name": "Colorado",
+        "lag": 0,
+        "r": 0.894,
+        "gain": 0.0,
+        "n": 22
+      },
+      {
+        "state": "WI",
+        "name": "Wisconsin",
+        "lag": 0,
+        "r": 0.867,
+        "gain": 0.0,
+        "n": 30
+      },
+      {
+        "state": "OR",
+        "name": "Oregon",
+        "lag": 0,
+        "r": 0.862,
+        "gain": 0.0,
+        "n": 30
+      },
+      {
+        "state": "IL",
+        "name": "Illinois",
+        "lag": 0,
+        "r": 0.813,
+        "gain": 0.0,
+        "n": 30
+      },
+      {
+        "state": "KS",
+        "name": "Kansas",
+        "lag": 0,
+        "r": 0.799,
+        "gain": 0.0,
+        "n": 11
+      }
+    ]
+  }
+}

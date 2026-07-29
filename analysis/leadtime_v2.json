@@ -1,0 +1,310 @@
+{
+  "coverage": {
+    "AL": 12.5,
+    "AZ": 1.2,
+    "CO": 1.0,
+    "FL": 2.7,
+    "GA": 22.0,
+    "IA": 1.6,
+    "ID": 2.7,
+    "IL": 62.2,
+    "IN": 3.5,
+    "KS": 9.1,
+    "KY": 9.4,
+    "MA": 34.1,
+    "MD": 2.3,
+    "ME": 4.8,
+    "MN": 60.3,
+    "MO": 51.5,
+    "MT": 3.6,
+    "NC": 3.6,
+    "NH": 2.2,
+    "NJ": 16.7,
+    "NV": 11.3,
+    "NY": 7.4,
+    "OR": 51.1,
+    "PA": 3.3,
+    "TX": 3.3,
+    "UT": 21.9,
+    "WI": 22.9,
+    "WV": 21.8
+  },
+  "sites": {
+    "AL": 5,
+    "AZ": 7,
+    "CO": 2,
+    "FL": 5,
+    "GA": 17,
+    "IA": 2,
+    "ID": 1,
+    "IL": 71,
+    "IN": 4,
+    "KS": 5,
+    "KY": 1,
+    "MA": 1,
+    "MD": 2,
+    "ME": 1,
+    "MN": 27,
+    "MO": 51,
+    "MT": 2,
+    "NC": 4,
+    "NH": 1,
+    "NJ": 2,
+    "NV": 2,
+    "NY": 9,
+    "OR": 33,
+    "PA": 3,
+    "TX": 8,
+    "UT": 2,
+    "WI": 33,
+    "WV": 24
+  },
+  "results": {
+    "Omicron": {
+      "lead": [
+        {
+          "state": "IL",
+          "name": "Illinois",
+          "lag": 1,
+          "r": 0.904,
+          "gain": 0.25,
+          "n": 13,
+          "sites": 71,
+          "coverage": 62.2
+        },
+        {
+          "state": "WI",
+          "name": "Wisconsin",
+          "lag": 1,
+          "r": 0.887,
+          "gain": 0.1,
+          "n": 15,
+          "sites": 33,
+          "coverage": 22.9
+        },
+        {
+          "state": "OR",
+          "name": "Oregon",
+          "lag": 1,
+          "r": 0.819,
+          "gain": 0.039,
+          "n": 23,
+          "sites": 33,
+          "coverage": 51.1
+        }
+      ],
+      "synchronous": [
+        {
+          "state": "WV",
+          "name": "West Virginia",
+          "lag": 0,
+          "r": 0.945,
+          "gain": 0.0,
+          "n": 24,
+          "sites": 24,
+          "coverage": 21.8
+        }
+      ],
+      "dropped": [
+        {
+          "state": "AZ",
+          "name": "Arizona",
+          "lag": 1,
+          "r": 0.697,
+          "gain": 0.03,
+          "n": 22,
+          "sites": 7,
+          "coverage": 1.2
+        },
+        {
+          "state": "ID",
+          "name": "Idaho",
+          "lag": 3,
+          "r": 0.991,
+          "gain": 0.183,
+          "n": 14,
+          "sites": 1,
+          "coverage": 2.7
+        },
+        {
+          "state": "MT",
+          "name": "Montana",
+          "lag": 2,
+          "r": 0.809,
+          "gain": 0.205,
+          "n": 21,
+          "sites": 2,
+          "coverage": 3.6
+        },
+        {
+          "state": "NV",
+          "name": "Nevada",
+          "lag": 1,
+          "r": 0.746,
+          "gain": 0.083,
+          "n": 23,
+          "sites": 2,
+          "coverage": 11.3
+        },
+        {
+          "state": "NY",
+          "name": "New York",
+          "lag": 1,
+          "r": 0.214,
+          "gain": 0.016,
+          "n": 16,
+          "sites": 9,
+          "coverage": 7.4
+        }
+      ]
+    },
+    "BA.5": {
+      "lead": [
+        {
+          "state": "GA",
+          "name": "Georgia",
+          "lag": 1,
+          "r": 0.924,
+          "gain": 0.053,
+          "n": 27,
+          "sites": 17,
+          "coverage": 22.0
+        }
+      ],
+      "synchronous": [
+        {
+          "state": "WV",
+          "name": "West Virginia",
+          "lag": 0,
+          "r": 0.92,
+          "gain": 0.0,
+          "n": 30,
+          "sites": 24,
+          "coverage": 21.8
+        },
+        {
+          "state": "WI",
+          "name": "Wisconsin",
+          "lag": 0,
+          "r": 0.867,
+          "gain": 0.0,
+          "n": 30,
+          "sites": 33,
+          "coverage": 22.9
+        },
+        {
+          "state": "OR",
+          "name": "Oregon",
+          "lag": 0,
+          "r": 0.862,
+          "gain": 0.0,
+          "n": 30,
+          "sites": 33,
+          "coverage": 51.1
+        },
+        {
+          "state": "IL",
+          "name": "Illinois",
+          "lag": 0,
+          "r": 0.813,
+          "gain": 0.0,
+          "n": 30,
+          "sites": 71,
+          "coverage": 62.2
+        }
+      ],
+      "dropped": [
+        {
+          "state": "AZ",
+          "name": "Arizona",
+          "lag": 2,
+          "r": 0.849,
+          "gain": 0.06,
+          "n": 28,
+          "sites": 7,
+          "coverage": 1.2
+        },
+        {
+          "state": "CO",
+          "name": "Colorado",
+          "lag": 0,
+          "r": 0.894,
+          "gain": 0.0,
+          "n": 22,
+          "sites": 2,
+          "coverage": 1.0
+        },
+        {
+          "state": "FL",
+          "name": "Florida",
+          "lag": 0,
+          "r": 0.924,
+          "gain": 0.0,
+          "n": 29,
+          "sites": 5,
+          "coverage": 2.7
+        },
+        {
+          "state": "ID",
+          "name": "Idaho",
+          "lag": 2,
+          "r": 0.919,
+          "gain": 0.397,
+          "n": 28,
+          "sites": 1,
+          "coverage": 2.7
+        },
+        {
+          "state": "KY",
+          "name": "Kentucky",
+          "lag": 1,
+          "r": 0.465,
+          "gain": 0.042,
+          "n": 29,
+          "sites": 1,
+          "coverage": 9.4
+        },
+        {
+          "state": "MT",
+          "name": "Montana",
+          "lag": 2,
+          "r": 0.956,
+          "gain": 0.034,
+          "n": 28,
+          "sites": 2,
+          "coverage": 3.6
+        },
+        {
+          "state": "NV",
+          "name": "Nevada",
+          "lag": 1,
+          "r": 0.296,
+          "gain": 0.172,
+          "n": 29,
+          "sites": 2,
+          "coverage": 11.3
+        },
+        {
+          "state": "NY",
+          "name": "New York",
+          "lag": 0,
+          "r": 0.353,
+          "gain": 0.0,
+          "n": 30,
+          "sites": 9,
+          "coverage": 7.4
+        },
+        {
+          "state": "TX",
+          "name": "Texas",
+          "lag": 1,
+          "r": 0.885,
+          "gain": 0.011,
+          "n": 29,
+          "sites": 8,
+          "coverage": 3.3
+        }
+      ]
+    }
+  }
+}

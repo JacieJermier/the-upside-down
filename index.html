@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Upside Down — COVID-19 Wastewater Surveillance</title>
+  <title>The Upside Down, COVID-19 Wastewater Surveillance</title>
   <script src="https://unpkg.com/deck.gl@8.9.35/dist.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
   <style>
@@ -86,9 +86,9 @@
       left: 0;
       right: 0;
       height: 40vh;
-      background: rgba(10,5,5,0.92);
-      border-top: 1px solid #331515;
-      overflow: visible;
+      background: rgba(22,14,14,0.92);
+      border-top: 1px solid #5a2c2c;
+      overflow: hidden;
       opacity: 0;
       transition: opacity 1.5s ease-in-out;
       pointer-events: none;
@@ -101,37 +101,37 @@
 
     /* === OVERLAYS === */
     #title-overlay {
-      position: absolute; top: 12px; left: 16px; z-index: 10; pointer-events: none;
+      position: absolute; top: 28px; left: 34px; z-index: 10; pointer-events: none;
     }
     #title-overlay h1 {
-      font-size: 24px; color: #cc2222;
-      text-shadow: 0 0 20px rgba(200,30,30,0.6); letter-spacing: 3px; text-transform: uppercase;
+      font-size: 32px; color: #ff4d4d;
+      text-shadow: 0 0 20px rgba(255,77,77,0.6); letter-spacing: 3px; text-transform: uppercase;
     }
-    #title-overlay .subtitle { font-size: 13px; color: #888; margin-top: 2px; letter-spacing: 1px; }
+    #title-overlay .subtitle { font-size: 16px; color: #b4b4b4; margin-top: 3px; letter-spacing: 1px; }
     #date-display {
-      position: absolute; top: 12px; right: 16px; z-index: 10; pointer-events: none; text-align: right;
+      position: absolute; top: 28px; right: 34px; z-index: 10; pointer-events: none; text-align: right;
     }
     #current-date {
-      font-size: 20px; color: #cc2222;
-      text-shadow: 0 0 15px rgba(200,30,30,0.5); letter-spacing: 2px;
+      font-size: 26px; color: #ff4d4d;
+      text-shadow: 0 0 15px rgba(255,77,77,0.5); letter-spacing: 2px;
     }
-    #active-sites { font-size: 12px; color: #888; margin-top: 2px; }
+    #active-sites { font-size: 15px; color: #b4b4b4; margin-top: 3px; }
 
     /* === VARIANT SELECTOR === */
     #variant-selector {
-      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      z-index: 30; display: flex; gap: 6px;
+      position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+      z-index: 30; display: flex; gap: 10px;
     }
     .variant-btn {
-      background: rgba(20,5,5,0.8); border: 1px solid #553333; color: #999;
-      padding: 6px 14px; border-radius: 4px; cursor: pointer;
-      font-family: 'Special Elite', monospace; font-size: 12px;
+      background: rgba(34,16,16,0.8); border: 1px solid #8a5555; color: #c2c2c2;
+      padding: 10px 24px; border-radius: 5px; cursor: pointer;
+      font-family: 'Special Elite', monospace; font-size: 16px;
       letter-spacing: 1px; transition: all 0.3s;
     }
-    .variant-btn:hover { border-color: #cc4422; color: #cc4422; }
+    .variant-btn:hover { border-color: #ff6a3d; color: #ff6a3d; }
     .variant-btn.active {
-      border-color: #cc2222; color: #cc2222; background: rgba(80,10,10,0.5);
-      box-shadow: 0 0 12px rgba(200,30,30,0.3);
+      border-color: #ff4d4d; color: #ff4d4d; background: rgba(110,26,26,0.5);
+      box-shadow: 0 0 12px rgba(255,77,77,0.3);
     }
 
     /* === NARRATIVE TEXT === */
@@ -143,11 +143,11 @@
     }
     #narrative-overlay.visible { opacity: 1; }
     #narrative-text {
-      font-size: 28px; color: #cc2222;
-      text-shadow: 0 0 30px rgba(200,30,30,0.8),0 0 60px rgba(200,30,30,0.4);
+      font-size: 28px; color: #ff4d4d;
+      text-shadow: 0 0 30px rgba(255,77,77,0.8),0 0 60px rgba(255,77,77,0.4);
       letter-spacing: 4px; text-transform: uppercase; line-height: 1.4;
     }
-    #narrative-subtext { font-size: 15px; color: #999; margin-top: 10px; letter-spacing: 1.5px; line-height: 1.6; }
+    #narrative-subtext { font-size: 15px; color: #c2c2c2; margin-top: 10px; letter-spacing: 1.5px; line-height: 1.6; }
 
     /* === EVENT ANNOTATION === */
     #event-annotation {
@@ -157,36 +157,37 @@
     }
     #event-annotation.visible { opacity: 1; }
     #event-text {
-      font-size: 13px; color: #cc6644;
-      text-shadow: 0 0 10px rgba(200,80,40,0.4);
+      font-size: 13px; color: #ff9166;
+      text-shadow: 0 0 10px rgba(255,145,102,0.4);
       letter-spacing: 2px; text-transform: uppercase;
-      border-right: 2px solid #cc4422; padding-right: 10px;
+      border-right: 2px solid #ff6a3d; padding-right: 10px;
     }
 
     /* Lead time callout */
+    /* Sits under the date and site counter in the top right corner. */
     #lead-time-annotation {
-      position: fixed; bottom: 90px; left: 20px;
+      position: fixed; top: 148px; right: 34px;
       z-index: 12; pointer-events: none;
       opacity: 0; transition: opacity 1.5s ease-in-out;
     }
     #lead-time-annotation.visible { opacity: 1; pointer-events: auto; }
 
     #lead-time-toggle {
-      position: fixed; bottom: 92px; left: 20px;
-      z-index: 12; background: none; border: 1px solid #cc4422;
-      color: #cc4422; width: 28px; height: 28px; border-radius: 50%;
-      cursor: pointer; font-size: 14px; display: none;
+      position: fixed; top: 106px; right: 34px;
+      z-index: 12; background: none; border: 1px solid #ff6a3d;
+      color: #ff6a3d; width: 32px; height: 32px; border-radius: 50%;
+      cursor: pointer; font-size: 15px; display: none;
       align-items: center; justify-content: center;
       transition: all 0.2s;
-      box-shadow: 0 0 8px rgba(200,60,30,0.4);
+      box-shadow: 0 0 8px rgba(255,106,61,0.4);
     }
     #lead-time-toggle.show { display: flex; }
-    #lead-time-toggle:hover { background: rgba(200,60,30,0.2); }
+    #lead-time-toggle:hover { background: rgba(255,106,61,0.2); }
     #lead-time-text {
       font-size: 15px; color: #ffaa33;
       text-shadow: 0 0 15px rgba(255,170,50,0.5);
       letter-spacing: 1px;
-      background: rgba(10,5,5,0.85);
+      background: rgba(22,14,14,0.85);
       padding: 12px 24px; border-radius: 6px;
       border: 1px solid rgba(255,170,50,0.3);
       text-align: left;
@@ -196,22 +197,22 @@
     /* === PHASE INDICATOR === */
     #phase-indicator {
       position: absolute; bottom: 8px; left: 16px; z-index: 10;
-      pointer-events: none; font-size: 12px; letter-spacing: 1px;
+      pointer-events: none; font-size: 14px; letter-spacing: 1px;
     }
-    #phase-indicator .phase-label { color: #cc2222; text-transform: uppercase; }
-    #phase-indicator .phase-desc { color: #666; margin-left: 8px; }
+    #phase-indicator .phase-label { color: #ff4d4d; text-transform: uppercase; }
+    #phase-indicator .phase-desc { color: #9c9c9c; margin-left: 8px; }
 
     /* === LEGEND === */
     #legend {
-      position: absolute; top: 70px; left: 16px; z-index: 10;
-      pointer-events: none; font-size: 11px;
-      display: flex; gap: 16px;
+      position: absolute; top: 108px; left: 34px; z-index: 10;
+      pointer-events: none; font-size: 14px;
+      display: flex; gap: 20px;
     }
-    .legend-item { display: flex; align-items: center; gap: 5px; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .legend-dot.ww { background: #dd3333; box-shadow: 0 0 6px rgba(220,50,50,0.6); }
-    .legend-dot.crack { background: #cc3311; box-shadow: 0 0 6px rgba(220,60,10,0.6); width: 16px; height: 3px; border-radius: 1px; }
-    .legend-label { color: #777; }
+    .legend-item { display: flex; align-items: center; gap: 7px; }
+    .legend-dot { width: 13px; height: 13px; border-radius: 50%; }
+    .legend-dot.ww { background: #ff5555; box-shadow: 0 0 6px rgba(255,90,90,0.6); }
+    .legend-dot.crack { background: #ff5a2a; box-shadow: 0 0 6px rgba(255,110,45,0.6); width: 20px; height: 4px; border-radius: 1px; }
+    .legend-label { color: #adadad; }
 
     /* === DUST CANVAS === */
     #dust-canvas {
@@ -225,59 +226,64 @@
       position: absolute; top: 0; left: 0; right: 0; height: calc(100vh - 80px);
       z-index: 25; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      background: rgba(10,5,5,0.7); cursor: pointer; transition: opacity 1s;
+      background: rgba(22,14,14,0.7); cursor: pointer; transition: opacity 1s;
     }
     #start-overlay.hidden { opacity: 0; pointer-events: none; }
     #start-text {
-      font-size: 20px; color: #cc2222;
-      text-shadow: 0 0 20px rgba(200,30,30,0.5);
+      font-size: 20px; color: #ff4d4d;
+      text-shadow: 0 0 20px rgba(255,77,77,0.5);
       letter-spacing: 3px; text-transform: uppercase; animation: pulse 2s ease-in-out infinite;
     }
-    #start-hint { font-size: 12px; color: #666; margin-top: 10px; letter-spacing: 1px; }
+    #start-hint { font-size: 12px; color: #9c9c9c; margin-top: 10px; letter-spacing: 1px; }
     @keyframes pulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
 
     /* === TIMELINE === */
     #timeline {
       position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
-      background: linear-gradient(to top, rgba(10,5,5,0.98), rgba(10,5,5,0.85));
+      background: linear-gradient(to top, rgba(22,14,14,0.98), rgba(22,14,14,0.85));
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; padding: 0 40px; z-index: 10;
     }
     #timeline-controls { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 1200px; }
-    #timeline-controls.disabled { opacity: 0.3; pointer-events: none; }
+    /* Dim and disable the playback controls before the story starts, but leave the
+       audio button live so viewers can mute before anything plays. Opacity has to
+       go on the children, since a parent's opacity would drag the button down too. */
+    #timeline-controls.disabled { pointer-events: none; }
+    #timeline-controls.disabled > *:not(#audio-toggle) { opacity: 0.3; }
+    #timeline-controls.disabled #audio-toggle { pointer-events: auto; }
     #play-btn {
-      background: none; border: 1px solid #cc2222; color: #cc2222;
+      background: none; border: 1px solid #ff4d4d; color: #ff4d4d;
       width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
       font-size: 12px; display: flex; align-items: center;
       justify-content: center; transition: all 0.2s; flex-shrink: 0;
     }
-    #play-btn:hover { background: rgba(200,30,30,0.2); }
+    #play-btn:hover { background: rgba(255,77,77,0.2); }
     #scrubber {
       flex: 1; -webkit-appearance: none; appearance: none;
-      height: 3px; background: #331111; border-radius: 2px; outline: none; cursor: pointer;
+      height: 3px; background: #5a2828; border-radius: 2px; outline: none; cursor: pointer;
     }
     #scrubber::-webkit-slider-thumb {
       -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
-      background: #cc2222; cursor: pointer; box-shadow: 0 0 8px rgba(200,30,30,0.6);
+      background: #ff4d4d; cursor: pointer; box-shadow: 0 0 8px rgba(255,77,77,0.6);
     }
     #scrubber::-moz-range-thumb {
-      width: 14px; height: 14px; border-radius: 50%; background: #cc2222;
-      cursor: pointer; border: none; box-shadow: 0 0 8px rgba(200,30,30,0.6);
+      width: 14px; height: 14px; border-radius: 50%; background: #ff4d4d;
+      cursor: pointer; border: none; box-shadow: 0 0 8px rgba(255,77,77,0.6);
     }
     #speed-btn {
-      background: none; border: 1px solid #553333; color: #888;
+      background: none; border: 1px solid #8a5555; color: #b4b4b4;
       padding: 3px 8px; border-radius: 4px; cursor: pointer;
       font-family: monospace; font-size: 11px; flex-shrink: 0; transition: all 0.2s;
     }
-    #speed-btn:hover { border-color: #cc2222; color: #cc2222; }
+    #speed-btn:hover { border-color: #ff4d4d; color: #ff4d4d; }
 
     #ridge-toggle, #audio-toggle, #info-toggle {
-      background: none; border: 1px solid #553333; color: #888;
+      background: none; border: 1px solid #8a5555; color: #b4b4b4;
       padding: 3px 8px; border-radius: 4px; cursor: pointer;
       font-size: 13px; flex-shrink: 0; transition: all 0.2s;
     }
-    #ridge-toggle:hover, #audio-toggle:hover, #info-toggle:hover { border-color: #cc2222; }
-    #ridge-toggle.active, #audio-toggle.active { border-color: #cc2222; color: #cc2222; background: rgba(80,10,10,0.3); }
+    #ridge-toggle:hover, #audio-toggle:hover, #info-toggle:hover { border-color: #ff4d4d; }
+    #ridge-toggle.active, #audio-toggle.active { border-color: #ff4d4d; color: #ff4d4d; background: rgba(110,26,26,0.3); }
 
     /* Scrubber wrapper for flip marker */
     #scrubber-wrapper {
@@ -288,8 +294,8 @@
     #flip-marker {
       position: absolute; top: -4px;
       width: 2px; height: 22px;
-      background: #cc4422;
-      box-shadow: 0 0 6px rgba(200,60,30,0.6);
+      background: #ff6a3d;
+      box-shadow: 0 0 6px rgba(255,106,61,0.6);
       pointer-events: none;
       border-radius: 1px;
       left: 0;
@@ -305,64 +311,80 @@
     /* Info panel */
     #info-panel {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      z-index: 50; background: rgba(5,2,2,0.92);
+      z-index: 50; background: rgba(14,9,9,0.92);
       display: none; align-items: center; justify-content: center;
     }
     #info-panel.visible { display: flex; }
     #info-content {
       max-width: 600px; padding: 30px;
-      background: rgba(20,10,10,0.95);
-      border: 1px solid #553333; border-radius: 8px;
-      color: #ccc; font-family: 'Special Elite', monospace;
+      background: rgba(34,22,22,0.95);
+      border: 1px solid #8a5555; border-radius: 8px;
+      color: #d8d8d8; font-family: 'Special Elite', monospace;
       max-height: 80vh; overflow-y: auto;
     }
+    /* Wrapper exists purely so the close button can hang off the outside
+       corner of the content box instead of sitting on the text. */
+    #info-box { position: relative; }
+    #info-x {
+      position: absolute; top: -15px; right: -15px; z-index: 2;
+      background: rgba(34,22,22,0.98); border: 1px solid #8a5555; color: #c6c6c6;
+      width: 34px; height: 34px; border-radius: 50%; line-height: 1;
+      font-family: 'Special Elite', monospace; font-size: 16px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    #info-x:hover { border-color: #ff4d4d; color: #ff4d4d; background: rgba(255,77,77,0.18); }
     #info-content h2 {
-      color: #cc2222; font-size: 20px; letter-spacing: 3px;
+      color: #ff4d4d; font-size: 20px; letter-spacing: 3px;
       text-transform: uppercase; margin-bottom: 12px;
-      text-shadow: 0 0 10px rgba(200,30,30,0.4);
+      text-shadow: 0 0 10px rgba(255,77,77,0.4);
     }
     #info-content h3 {
-      color: #cc5544; font-size: 14px; letter-spacing: 2px;
+      color: #ff8877; font-size: 14px; letter-spacing: 2px;
       text-transform: uppercase; margin-top: 16px; margin-bottom: 6px;
     }
     #info-content p {
-      font-size: 13px; line-height: 1.6; margin-bottom: 8px; color: #aaa;
+      font-size: 13px; line-height: 1.6; margin-bottom: 8px; color: #c6c6c6;
     }
-    #info-content strong { color: #ddd; }
-    #info-content em { color: #cc6644; }
+    #info-content strong { color: #e8e8e8; }
+    #info-content em { color: #ff9166; }
     #info-close {
       margin-top: 16px; padding: 8px 24px;
-      background: none; border: 1px solid #cc2222; color: #cc2222;
+      background: none; border: 1px solid #ff4d4d; color: #ff4d4d;
       font-family: 'Special Elite', monospace; font-size: 13px;
       letter-spacing: 2px; cursor: pointer; border-radius: 4px;
       transition: all 0.2s;
     }
-    #info-close:hover { background: rgba(200,30,30,0.2); }
+    #info-close:hover { background: rgba(255,77,77,0.2); }
     #timeline-dates {
       display: flex; justify-content: space-between;
       width: 100%; max-width: 1200px;
-      font-size: 10px; color: #555;
-      padding: 2px 46px 0 46px;
+      font-size: 14px; color: #c2c2c2;
+      padding: 4px 46px 0 46px;
     }
 
     /* === TOOLTIP === */
     #tooltip {
       position: fixed; z-index: 30; pointer-events: none;
-      background: rgba(20,0,0,0.9); border: 1px solid #cc2222;
+      background: rgba(34,12,12,0.9); border: 1px solid #ff4d4d;
       color: #e0e0e0; padding: 6px 10px; border-radius: 4px;
       font-size: 11px; font-family: monospace; display: none;
-      box-shadow: 0 0 15px rgba(200,30,30,0.3);
+      box-shadow: 0 0 15px rgba(255,77,77,0.3);
     }
 
     /* === RIDGELINE === */
-    .ridge-label { fill: #999; font-size: 11px; font-family: 'Special Elite', monospace; }
-    .ridge-area-ww { fill: rgba(200,30,30,0.3); stroke: #cc2222; stroke-width: 1.5; }
-    .ridge-area-cl { fill: rgba(30,180,220,0.2); stroke: #22bbdd; stroke-width: 1.5; }
-    .ridge-timeline { stroke: #cc2222; stroke-width: 1; opacity: 0.8; }
+    .ridge-area-ww { fill: rgba(255,70,70,0.42); stroke: #ff5555; stroke-width: 2; }
+    .ridge-area-cl { fill: rgba(90,205,255,0.28); stroke: #5ad2ff; stroke-width: 2; }
+    .ridge-timeline { stroke: #ff5555; stroke-width: 1.4; opacity: 0.9; }
+    /* Sits just above the ridgeline panel rather than inside it, so it never
+       overlaps the curves. Fades in with the panel via the sibling selector. */
     #ridgeline-title {
-      position: absolute; top: 8px; left: 16px; font-size: 13px;
-      color: #cc2222; letter-spacing: 2px; text-transform: uppercase;
+      position: fixed; bottom: calc(80px + 40vh + 8px); left: 34px;
+      font-size: 15px; color: #ff4d4d; letter-spacing: 2px;
+      text-transform: uppercase; text-shadow: 0 0 12px rgba(255,77,77,0.5);
+      z-index: 8; pointer-events: none;
+      opacity: 0; transition: opacity 1.5s ease-in-out;
     }
+    #ridgeline-container.visible + #ridgeline-title { opacity: 1; }
   </style>
 </head>
 <body>
@@ -385,8 +407,7 @@
   </div>
 
   <div id="variant-selector">
-    <button class="variant-btn active" data-variant="delta">Delta</button>
-    <button class="variant-btn" data-variant="omicron">Omicron</button>
+    <button class="variant-btn active" data-variant="omicron">Omicron</button>
     <button class="variant-btn" data-variant="ba5">BA.5</button>
   </div>
 
@@ -418,9 +439,9 @@
   </div>
 
   <div id="ridgeline-container">
-    <div id="ridgeline-title">Lead-Lag by Region</div>
     <svg id="ridgeline-svg"></svg>
   </div>
+  <div id="ridgeline-title">Lead-Lag by Region</div>
 
   <div id="timeline">
     <div id="timeline-controls">
@@ -431,32 +452,32 @@
       </div>
       <button id="speed-btn">1x</button>
       <button id="ridge-toggle" title="Toggle ridgeline plot">📊</button>
-      <button id="audio-toggle" title="Toggle audio">🔇</button>
       <button id="info-toggle" title="About this visualization">ℹ️</button>
+      <button id="audio-toggle" class="active" title="Mute audio">🔊</button>
     </div>
     <div id="timeline-dates"><span id="tl-start"></span><span id="tl-mid"></span><span id="tl-end"></span></div>
   </div>
 
-  <!-- Audio -->
-  <audio id="bg-audio" loop preload="auto">
-    <source src="./audio/stranger-things-theme.mp3" type="audio/mpeg">
-  </audio>
-
   <!-- Info/About panel -->
   <div id="info-panel">
+    <div id="info-box">
+      <button id="info-x" title="Close">&#10005;</button>
     <div id="info-content">
       <h2>About This Visualization</h2>
       <p>This visualization explores how <strong>wastewater surveillance</strong> detected COVID-19 outbreaks before hospitals saw the surge. Using data from the CDC's National Wastewater Surveillance System (NWSS) and clinical case reports, it reveals the <strong>lead time</strong> between underground detection and surface-level outbreaks.</p>
       <h3>The Metaphor</h3>
-      <p>Inspired by <em>Stranger Things</em>, the visualization frames wastewater data as <strong>the Upside Down</strong> — a hidden layer of reality where threats are detectable before they break through to the surface. This isn't just decoration: Byrne et al. (2019) showed that figurative frames in visualization expand expressiveness by layering descriptive meaning onto abstract data.</p>
+      <p>Inspired by <em>Stranger Things</em>, the visualization frames wastewater data as <strong>the Upside Down</strong>, a hidden layer of reality where threats are detectable before they break through to the surface. This is not just decoration. Byrne et al. (2019) showed that figurative frames in visualization expand expressiveness by layering descriptive meaning onto abstract data.</p>
       <h3>How to Read It</h3>
       <p><strong>The Upside Down (red layer):</strong> Glowing red dots show wastewater sampling sites detecting viral RNA. Larger, brighter dots indicate stronger signal at higher-capacity treatment plants.</p>
       <p><strong>The Breach (3D tilt):</strong> When clinical cases surge, the scene tilts to 65° revealing two transparent map layers stacked in Z-space. The blue surface layer returns and lands on top of the red layer. Amber cracks then grow where the virus broke through to hospitals, with crack intensity reflecting how strong the wastewater signal was at each site.</p>
-      <p><strong>Ridgeline plot:</strong> Shows wastewater signal (red filled) vs clinical cases (blue dashed) per region. The horizontal gap between peaks is the lead time. Hover a region to reveal it from the default ghosted state.</p>
+      <p><strong>Ridgeline plot:</strong> Shows wastewater signal (red filled) vs clinical cases (blue dashed) per region. The horizontal gap between peaks is the lead time.</p>
+      <p><strong>Hover a region to compare it:</strong> Moving your cursor over any row brings that region forward in full colour while the others dim back. This is the easiest way to see how far ahead the red wastewater curve sits from the blue clinical curve. Where the two curves sit almost on top of each other, that region had no early warning at all.</p>
+      <p><strong>Lead times (⚡ button):</strong> Reveals the measured lead time for every state in the current wave. These are computed by cross-correlating weekly wastewater levels against weekly case counts, so a state listed as no lead is one where the two signals moved together.</p>
       <h3>Data Sources</h3>
-      <p>CDC NWSS Public SARS-CoV-2 Wastewater Metric Data (2020–2022)<br>
+      <p>CDC NWSS Public SARS-CoV-2 Wastewater Metric Data (2020 to 2022)<br>
       CDC Weekly COVID-19 Cases and Deaths by State</p>
       <button id="info-close">Close</button>
+    </div>
     </div>
   </div>
 
@@ -467,24 +488,6 @@
     // VARIANT DEFINITIONS
     // ============================================
     var VARIANTS = {
-      delta: {
-        name: 'Delta', start: '2021-06-15', end: '2021-11-30',
-        flipDate: '2021-07-19', peakDate: '2021-09-06',
-        narrative: ['Delta variant detected', 'Wastewater surveillance sounds the alarm'],
-        risingSignal: ['The signal spreads', 'Viral RNA concentrations climbing across treatment plants'],
-        preBreachText: 'Hospitals have not yet seen the surge',
-        breachNarrative: ['The breach', 'Clinical cases confirm what sewers already knew'],
-        insightNarrative: ['The underground saw it first', 'Wastewater signaled the Delta surge weeks before case counts rose'],
-        endNarrative: ['Early warning, confirmed', 'Across multiple states, wastewater led clinical detection by 1–2 weeks'],
-        eventLabel: 'Delta wave',
-        zoomTarget: { longitude: -120, latitude: 42, zoom: 4.2, pitch: 0, bearing: 0 },
-        zoomStateAbbrev: 'OR',
-        leadTimes: {
-          'OR': { days: 7, label: 'Oregon: 1 week early' },
-          'MO': { days: 14, label: 'Missouri: 2 weeks early' },
-          'AZ': { days: 7, label: 'Arizona: 1 week early' }
-        }
-      },
       omicron: {
         name: 'Omicron', start: '2021-11-01', end: '2022-04-30',
         flipDate: '2021-12-20', peakDate: '2022-01-10',
@@ -495,40 +498,49 @@
         insightNarrative: ['The sewers knew', 'While tests ran short, wastewater never stopped detecting'],
         endNarrative: ['When testing broke down, sewers held the line', 'Wastewater provided continuous surveillance even as clinical testing was overwhelmed'],
         eventLabel: 'Omicron surge',
-        zoomTarget: { longitude: -89.5, latitude: 42, zoom: 4.5, pitch: 0, bearing: 0 },
-        zoomStateAbbrev: 'OR',
-        earlyLeadState: 'OR',
-        earlyLeadOffset: 2,
+        zoomTarget: { longitude: -89.2, latitude: 40.0, zoom: 4.6, pitch: 0, bearing: 0 },
+        zoomStateAbbrev: 'IL',
+        earlyLeadState: 'IL',
+        earlyLeadOffset: 3,
+        // Only regions where sampled plants cover a real share of the population.
+        // Appalachian (West Virginia) is the honest counterexample, peaking at lag 0.
+        ridgeRegions: ['Pacific NW', 'Upper Midwest', 'Lower Midwest', 'Appalachian'],
+        // Cross-correlation of weekly wastewater percentile against weekly new cases,
+        // restricted to states with at least 15% of population under surveillance and
+        // 5 or more plants. See analysis/leadtime_v2.py.
         leadTimes: {
-          'OR': { days: 7, label: 'Oregon: 1 week early' },
-          'MT': { days: 7, label: 'Montana: 1 week early' },
-          'IL': { days: 7, label: 'Illinois: 1 week early' },
-          'FL': { days: 7, label: 'Florida: 1 week early' },
-          'KY': { days: 7, label: 'Kentucky: 1 week early' },
-          'GA': { days: 7, label: 'Georgia: 1 week early' }
+          'IL': { days: 7, label: 'Illinois: 1 week early (r = 0.90)' },
+          'WI': { days: 7, label: 'Wisconsin: 1 week early (r = 0.89)' },
+          'OR': { days: 7, label: 'Oregon: 1 week early (r = 0.82)' },
+          'WV': { days: 0, label: 'West Virginia: no lead (r = 0.94)' }
         }
       },
       ba5: {
         name: 'BA.5', start: '2022-03-07', end: '2022-09-30',
         flipDate: '2022-04-25', peakDate: '2022-07-18',
         narrative: ['BA.5 subvariant emerges', 'Immune evasion drives a new wave'],
-        risingSignal: ['Reinfection wave building', 'Prior immunity offers less protection — wastewater catches the shift'],
+        risingSignal: ['Reinfection wave building', 'Prior immunity offers less protection, but wastewater catches the shift'],
         preBreachText: 'Public attention has moved on, but the signal has not',
         breachNarrative: ['The breach', 'A stealth wave surfaces in hospitals'],
-        insightNarrative: ['The hidden wave', 'Reduced testing missed BA.5 — but wastewater did not'],
+        insightNarrative: ['The hidden wave', 'Reduced testing missed BA.5, but wastewater did not'],
         endNarrative: ['Surveillance without symptoms', 'As fewer people tested, wastewater became the primary early warning system'],
         eventLabel: 'BA.5 wave',
-        zoomTarget: { longitude: -84, latitude: 34, zoom: 4.2, pitch: 0, bearing: 0 },
+        zoomTarget: { longitude: -83.5, latitude: 32.8, zoom: 4.6, pitch: 0, bearing: 0 },
         zoomStateAbbrev: 'GA',
+        // Same reveal flow as Omicron: call out the zoom state's lead first,
+        // then bring up the rest of the states mid-timeline.
+        earlyLeadState: 'GA',
+        earlyLeadOffset: 2,
+        // Same four well-covered regions as Omicron, so the two waves are comparable.
+        ridgeRegions: ['Pacific NW', 'Upper Midwest', 'Lower Midwest', 'Appalachian'],
+        // Georgia is the only adequately covered state that leads during BA.5.
+        // The rest are shown precisely because they do not.
         leadTimes: {
-          'OR': { days: 7, label: 'Oregon: 1 week early' },
-          'FL': { days: 7, label: 'Florida: 1 week early' },
-          'GA': { days: 7, label: 'Georgia: 1 week early' },
-          'IL': { days: 7, label: 'Illinois: 1 week early' },
-          'KY': { days: 7, label: 'Kentucky: 1 week early' },
-          'MO': { days: 7, label: 'Missouri: 1 week early' },
-          'ID': { days: 14, label: 'Idaho: 2 weeks early' },
-          'MT': { days: 14, label: 'Montana: 2 weeks early' }
+          'GA': { days: 7, label: 'Georgia: 1 week early (r = 0.92)' },
+          'WV': { days: 0, label: 'West Virginia: no lead (r = 0.92)' },
+          'WI': { days: 0, label: 'Wisconsin: no lead (r = 0.87)' },
+          'OR': { days: 0, label: 'Oregon: no lead (r = 0.86)' },
+          'IL': { days: 0, label: 'Illinois: no lead (r = 0.81)' }
         }
       }
     };
@@ -598,6 +610,18 @@
     async function init() {
       var data = await loadData();
       var states = data.states, sites = data.sites, siteWeekly = data.siteWeekly;
+
+      // Drop Alaska, Hawaii and the territories. None of them have wastewater sites
+      // in this dataset, and leaving them in stretches the map out sideways.
+      var OFF_MAP = ['Alaska', 'Hawaii', 'Puerto Rico', 'Guam', 'American Samoa',
+                     'United States Virgin Islands',
+                     'Commonwealth of the Northern Mariana Islands'];
+      states = {
+        type: 'FeatureCollection',
+        features: data.states.features.filter(function(f) {
+          return OFF_MAP.indexOf(f.properties.name) === -1;
+        })
+      };
       var stateCases = data.stateCases, regionWeekly = data.regionWeekly;
       var regionOrder = data.regionOrder;
 
@@ -629,7 +653,7 @@
       // ============================================
       // STATE
       // ============================================
-      var currentVariantId = 'delta';
+      var currentVariantId = 'omicron';
       var variantWeeks = [];   // weeks for current variant
       var currentWeekIndex = 0;
       var isPlaying = false, playInterval = null;
@@ -680,6 +704,7 @@
         inUpsideDown = false;
         narrativeTriggered = {};
         resetCrackSmoothing();
+        Synth.setIntensity(0);   // back to the closed, underground sound
 
         // Reset surface layer and scene tilt
         var surface = document.getElementById('surface-layer');
@@ -879,6 +904,7 @@
         // Step 5: NOW enable cracks and resume — viewer sees them grow from zero
         setTimeout(function() {
           isFlipped = true;
+          Synth.setIntensity(1);   // open the filter up once cases break through
           play();
         }, 7500);
       }
@@ -910,23 +936,23 @@
       // DOT COLORS (wastewater)
       // ============================================
       function getDotColor(d) {
-        var alpha = d.stale ? 80 : 210;
+        var alpha = d.stale ? 130 : 235;
         var p = d.percentile;
         if (p == null || isNaN(p)) {
           // Use detect_prop as fallback
           var dp = d.detect_prop;
-          if (dp != null && dp > 50) return [180, 30, 30, alpha];
-          return [150, 20, 20, 50];
+          if (dp != null && dp > 50) return [225, 70, 70, alpha];
+          return [190, 55, 55, 110];
         }
         var t = p / 100;
-        return [Math.floor(100 + t * 155), Math.floor(t * t * 80), Math.floor(t * t * 30), alpha];
+        return [Math.floor(165 + t * 90), Math.floor(38 + t * t * 92), Math.floor(42 + t * t * 38), alpha];
       }
 
       function getDotGlowColor(d) {
-        if (d.stale) return [150, 20, 20, 8];
-        var p = d.percentile; if (p == null || isNaN(p)) return [150, 20, 20, 12];
+        if (d.stale) return [200, 45, 45, 16];
+        var p = d.percentile; if (p == null || isNaN(p)) return [200, 45, 45, 24];
         var t = p / 100;
-        return [200, 20 + t * 30, 20, Math.floor(15 + t * 55)];
+        return [255, 60 + t * 45, 55, Math.floor(30 + t * 75)];
       }
 
       function getDotRadius(d) {
@@ -981,8 +1007,8 @@
       var statesLayer = new deck.GeoJsonLayer({
         id: 'us-states', data: states,
         filled: true, stroked: true,
-        getFillColor: [15, 5, 5, 160],
-        getLineColor: [140, 40, 40, 220],
+        getFillColor: [58, 14, 20, 205],
+        getLineColor: [242, 78, 78, 255],
         getLineWidth: 2, lineWidthMinPixels: 1.2, pickable: false
       });
 
@@ -1005,8 +1031,8 @@
       var surfaceStatesLayer = new deck.GeoJsonLayer({
         id: 'surface-states', data: states,
         filled: true, stroked: true,
-        getFillColor: [12, 14, 22, 160],
-        getLineColor: [70, 85, 110, 200],
+        getFillColor: [30, 56, 92, 200],
+        getLineColor: [145, 205, 255, 245],
         getLineWidth: 2, lineWidthMinPixels: 1.2, pickable: false
       });
 
@@ -1108,7 +1134,7 @@
           var earlyLT = v.leadTimes[v.earlyLeadState];
           if (earlyLT) {
             leadTimeText.innerHTML = '⚡ ' + earlyLT.label;
-            leadTimeEl.classList.add('visible');
+            setLeadTimeVisible(true);
             leadTimeToggleBtn.classList.add('show');
           }
         }
@@ -1127,7 +1153,7 @@
               lines.push('⚡ ' + v.leadTimes[st].label);
             });
             leadTimeText.innerHTML = lines.join('<br>');
-            leadTimeEl.classList.add('visible');
+            setLeadTimeVisible(true);
           }
         }
         if (currentWeekIndex >= flipWeekIndex + 4 && !narrativeTriggered['zoom']) {
@@ -1150,7 +1176,7 @@
               if (zoomLT) {
                 leadTimeText.innerHTML = '⚡ ' + zoomLT.label;
               }
-              leadTimeEl.classList.add('visible');
+              setLeadTimeVisible(true);
               leadTimeToggleBtn.classList.add('show');
             }, 2500);
           }
@@ -1175,7 +1201,7 @@
                 lines.push('⚡ ' + v.leadTimes[st].label);
               });
               leadTimeText.innerHTML = lines.join('<br>');
-              leadTimeEl.classList.add('visible');
+              setLeadTimeVisible(true);
             }, 2000);
           }
         }
@@ -1298,8 +1324,8 @@
               id: 'crack-glow', data: crackPaths,
               getPath: function(d) { return d.path; },
               getColor: function(d) {
-                var sw = d.siteWeight || 0.5;
-                return [200, 50, 10, Math.floor((20 + d.intensity * 50) * sw)];
+                var sw = Math.max(0.45, d.siteWeight || 0.5);
+                return [255, 95, 35, Math.floor((34 + d.intensity * 72) * sw)];
               },
               getWidth: function(d) {
                 var sw = d.siteWeight || 0.5;
@@ -1313,9 +1339,9 @@
               getPath: function(d) { return d.path; },
               getColor: function(d) {
                 var t = d.intensity;
-                var sw = d.siteWeight || 0.5;
-                var alpha = Math.floor((120 + t * 80) * sw);
-                return [Math.floor(220+t*35), Math.floor(50+t*50), Math.floor(5+t*20), alpha];
+                var sw = Math.max(0.5, d.siteWeight || 0.5);
+                var alpha = Math.floor((175 + t * 80) * sw);
+                return [255, Math.floor(110+t*55), Math.floor(50+t*30), alpha];
               },
               getWidth: function(d) {
                 var sw = d.siteWeight || 0.5;
@@ -1355,7 +1381,7 @@
         var container = document.getElementById('ridgeline-container');
         var W = container.offsetWidth;
         var H = container.offsetHeight;
-        var margin = { top: 30, right: 30, bottom: 22, left: 120 };
+        var margin = { top: 46, right: 30, bottom: 30, left: 130 };
 
         ridgeSvg.attr('width', W).attr('height', H)
           .style('overflow', 'visible')
@@ -1365,13 +1391,31 @@
           return d.week >= startDate && d.week <= endDate && d.region;
         });
 
+        // NWSS percentile reporting only starts partway through the Omicron window.
+        // Before that the rows carry mean_detect_prop instead, which is a different
+        // measure on a different scale, and plotting it as if it were intensity put a
+        // false spike at the left edge and squashed the real data. Drop those weeks.
+        var firstPctWeek = null;
+        filtered.forEach(function(d) {
+          if (d.mean_percentile != null && (firstPctWeek === null || d.week < firstPctWeek)) {
+            firstPctWeek = d.week;
+          }
+        });
+        if (firstPctWeek) {
+          filtered = filtered.filter(function(d) { return d.week >= firstPctWeek; });
+        }
+
         var weeks = Array.from(new Set(filtered.map(function(d) { return d.week; }))).sort();
         if (weeks.length === 0) return;
 
         var x = d3.scaleLinear().domain([0, weeks.length - 1]).range([margin.left, W - margin.right]);
         var weekToIdx = {}; weeks.forEach(function(w, i) { weekToIdx[w] = i; });
 
+        // Each variant picks its own rows so the plot shows regions whose lead time
+        // was actually measurable, rather than every region that happens to have data.
+        var allowed = VARIANTS[currentVariantId].ridgeRegions;
         var visibleRegions = regionOrder.filter(function(r) {
+          if (allowed && allowed.indexOf(r) === -1) return false;
           return filtered.some(function(d) { return d.region === r; });
         });
 
@@ -1393,7 +1437,9 @@
 
         var totalRows = visibleRegions.length;
         var rowSpacing = (H - margin.top - margin.bottom) / (totalRows + 0.3);
-        var peakHeight = rowSpacing * 2.5;
+        // Cap the peak so the tallest curve (the top row) still lands inside the
+        // SVG. Without this the first row overshoots the top and spills over the map.
+        var peakHeight = Math.min(rowSpacing * 2.5, margin.top + rowSpacing - 8);
 
         function baseY(regionIdx) {
           return margin.top + (regionIdx + 1) * rowSpacing;
@@ -1492,8 +1538,8 @@
             .attr('y', -2)
             .attr('text-anchor', 'end')
             .attr('dominant-baseline', 'middle')
-            .attr('fill', '#444')
-            .attr('font-size', '11px')
+            .attr('fill', '#949494')
+            .attr('font-size', '14px')
             .attr('font-family', 'Special Elite')
             .attr('class', 'ridge-label-text')
             .text(region);
@@ -1508,29 +1554,29 @@
           regionGroups.forEach(function(rg) {
             if (rg.region === targetRegion) {
               // Highlight: red wastewater, cyan clinical
-              rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(200, 30, 30, 0.55)');
-              rg.g.selectAll('.ridge-ww-line').attr('stroke', '#dd2222').attr('stroke-width', 2);
-              rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(30, 150, 200, 0.3)');
-              rg.g.selectAll('.ridge-cl-line').attr('stroke', '#22bbdd').attr('stroke-width', 1.8);
-              rg.labelG.selectAll('.ridge-label-text').attr('fill', '#dd2222');
+              rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(255, 70, 70, 0.62)');
+              rg.g.selectAll('.ridge-ww-line').attr('stroke', '#ff6060').attr('stroke-width', 2.4);
+              rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(90, 200, 255, 0.34)');
+              rg.g.selectAll('.ridge-cl-line').attr('stroke', '#6ad8ff').attr('stroke-width', 2.2);
+              rg.labelG.selectAll('.ridge-label-text').attr('fill', '#ff7a7a');
             } else {
               // Dim others
-              rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(50, 20, 20, 0.2)');
-              rg.g.selectAll('.ridge-ww-line').attr('stroke', '#442222').attr('stroke-width', 0.8);
-              rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(30, 30, 40, 0.1)');
-              rg.g.selectAll('.ridge-cl-line').attr('stroke', '#383844').attr('stroke-width', 0.6);
-              rg.labelG.selectAll('.ridge-label-text').attr('fill', '#444');
+              rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(190, 60, 60, 0.22)');
+              rg.g.selectAll('.ridge-ww-line').attr('stroke', '#b45252').attr('stroke-width', 1.4);
+              rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(80, 150, 190, 0.14)');
+              rg.g.selectAll('.ridge-cl-line').attr('stroke', '#6f9ec4').attr('stroke-width', 1.2);
+              rg.labelG.selectAll('.ridge-label-text').attr('fill', '#949494');
             }
           });
         }
 
         function resetHighlight() {
           regionGroups.forEach(function(rg) {
-            rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(50, 20, 20, 0.2)');
-            rg.g.selectAll('.ridge-ww-line').attr('stroke', '#442222').attr('stroke-width', 0.8);
-            rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(30, 30, 40, 0.1)');
-            rg.g.selectAll('.ridge-cl-line').attr('stroke', '#383844').attr('stroke-width', 0.6);
-            rg.labelG.selectAll('.ridge-label-text').attr('fill', '#444');
+            rg.g.selectAll('.ridge-ww-fill').attr('fill', 'rgba(190, 60, 60, 0.22)');
+            rg.g.selectAll('.ridge-ww-line').attr('stroke', '#b45252').attr('stroke-width', 1.4);
+            rg.g.selectAll('.ridge-cl-fill').attr('fill', 'rgba(80, 150, 190, 0.14)');
+            rg.g.selectAll('.ridge-cl-line').attr('stroke', '#6f9ec4').attr('stroke-width', 1.2);
+            rg.labelG.selectAll('.ridge-label-text').attr('fill', '#949494');
           });
         }
 
@@ -1552,40 +1598,44 @@
         // X-axis date labels
         var numLabels = Math.min(6, weeks.length);
         var labelStep = Math.floor(weeks.length / numLabels);
+        var lastLabelText = null;
         for (var li = 0; li < weeks.length; li += labelStep) {
           var labelWeek = weeks[li];
           var ld = new Date(labelWeek + 'T00:00:00');
           var lMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
           var labelText = lMonths[ld.getMonth()] + ' ' + ld.getFullYear();
+          // Two ticks can land in the same month, which printed the month twice.
+          if (labelText === lastLabelText) continue;
+          lastLabelText = labelText;
           ridgeSvg.append('text')
             .attr('x', x(li))
-            .attr('y', H - 2)
+            .attr('y', H - 4)
             .attr('text-anchor', 'middle')
-            .attr('fill', '#555')
-            .attr('font-size', '9px')
+            .attr('fill', '#c8c8c8')
+            .attr('font-size', '15px')
             .attr('font-family', 'Special Elite')
             .text(labelText);
           ridgeSvg.append('line')
             .attr('x1', x(li)).attr('x2', x(li))
-            .attr('y1', H - 12).attr('y2', H - 8)
-            .attr('stroke', '#443333').attr('stroke-width', 0.5);
+            .attr('y1', H - 22).attr('y2', H - 17)
+            .attr('stroke', '#7a5555').attr('stroke-width', 1);
         }
 
         // Legend
-        var lg = ridgeSvg.append('g').attr('transform', 'translate(' + (W - margin.right - 150) + ',' + (margin.top - 2) + ')');
-        lg.append('rect').attr('x', -6).attr('y', -10).attr('width', 158).attr('height', 40)
-          .attr('fill', 'rgba(10,5,5,0.85)').attr('rx', 3);
-        lg.append('line').attr('x1', 0).attr('x2', 16).attr('y1', -1).attr('y2', -1)
-          .attr('stroke', '#cc4444').attr('stroke-width', 2);
-        lg.append('text').attr('x', 20).attr('y', 3).attr('fill', '#cc4444')
-          .attr('font-size', '10px').attr('font-family', 'Special Elite')
+        var lg = ridgeSvg.append('g').attr('transform', 'translate(' + (W - margin.right - 215) + ',' + (margin.top - 2) + ')');
+        lg.append('rect').attr('x', -10).attr('y', -16).attr('width', 222).attr('height', 68)
+          .attr('fill', 'rgba(22,14,14,0.88)').attr('rx', 4);
+        lg.append('line').attr('x1', 0).attr('x2', 24).attr('y1', 0).attr('y2', 0)
+          .attr('stroke', '#ff5555').attr('stroke-width', 2.5);
+        lg.append('text').attr('x', 32).attr('y', 5).attr('fill', '#ff6b6b')
+          .attr('font-size', '14px').attr('font-family', 'Special Elite')
           .text(usePercentile ? 'Wastewater' : 'WW detection');
-        lg.append('line').attr('x1', 0).attr('x2', 16).attr('y1', 11).attr('y2', 11)
-          .attr('stroke', '#4488aa').attr('stroke-width', 2).attr('stroke-dasharray', '4,2');
-        lg.append('text').attr('x', 20).attr('y', 15).attr('fill', '#4488aa')
-          .attr('font-size', '10px').attr('font-family', 'Special Elite').text('Clinical');
-        lg.append('text').attr('x', 0).attr('y', 26).attr('fill', '#555')
-          .attr('font-size', '8px').attr('font-family', 'Special Elite').text('Hover a region to reveal');
+        lg.append('line').attr('x1', 0).attr('x2', 24).attr('y1', 22).attr('y2', 22)
+          .attr('stroke', '#5ad2ff').attr('stroke-width', 2.5).attr('stroke-dasharray', '5,3');
+        lg.append('text').attr('x', 32).attr('y', 27).attr('fill', '#6ad8ff')
+          .attr('font-size', '14px').attr('font-family', 'Special Elite').text('Clinical');
+        lg.append('text').attr('x', 0).attr('y', 46).attr('fill', '#b4b4b4')
+          .attr('font-size', '11px').attr('font-family', 'Special Elite').text('Hover a region to reveal');
 
         ridgeSvg._xScale = x;
         ridgeSvg._weekToIdx = weekToIdx;
@@ -1665,6 +1715,7 @@
           if (currentWeekIndex >= variantWeeks.length) {
             currentWeekIndex = variantWeeks.length - 1;
             pause();
+            fadeOutAudio();
             return;
           }
           updateFrame();
@@ -1780,24 +1831,165 @@
       window.addEventListener('resize', alignTimelineDates);
 
       // ============================================
-      // AUDIO CONTROLS
+      // AUDIO — generated in the browser, there is no sound file
       // ============================================
-      var bgAudio = document.getElementById('bg-audio');
       var audioToggle = document.getElementById('audio-toggle');
-      var audioPlaying = false;
+      // Audio starts switched on. Nothing actually sounds until the user clicks
+      // "Enter the Upside Down", because browsers block audio before a gesture.
+      var audioPlaying = true;
 
-      bgAudio.volume = 0.3;
+      // A small analogue-style synth. Two detuned saws running an arpeggio through
+      // a resonant low-pass, plus a sub drone underneath. Same toolkit the old
+      // horror scores used, which is where the whole look of this piece comes from.
+      var Synth = (function() {
+        var ctx, master, filter, delay, feedback, lfo, drones = [];
+        var timer = null, step = 0, nextNoteTime = 0, started = false;
+
+        var ROOT = 50;                        // D3
+        var PATTERN = [0, 7, 3, 10, 0, 5, 3, 7];   // scale steps, in semitones
+        var STEP = 60 / 108 / 4;              // sixteenths at 108 bpm
+        var PEAK = 0.18;                      // master gain when fully up
+
+        function hz(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+
+        function build() {
+          ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+          master = ctx.createGain();
+          master.gain.value = 0;
+          master.connect(ctx.destination);
+
+          filter = ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 700;
+          filter.Q.value = 7;
+          filter.connect(master);
+
+          // Slow drift on the cutoff so the sound never sits completely still
+          lfo = ctx.createOscillator();
+          lfo.type = 'sine';
+          lfo.frequency.value = 0.05;
+          var depth = ctx.createGain();
+          depth.gain.value = 240;
+          lfo.connect(depth);
+          depth.connect(filter.frequency);
+          lfo.start();
+
+          // Echo on the off-beats, which is what gives it the drifting feel
+          delay = ctx.createDelay(1.5);
+          delay.delayTime.value = STEP * 3;
+          feedback = ctx.createGain();
+          feedback.gain.value = 0.34;
+          delay.connect(feedback);
+          feedback.connect(delay);
+          delay.connect(filter);
+
+          // Sub drone two octaves down, slightly detuned against itself
+          [0, 5].forEach(function(cents) {
+            var o = ctx.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.value = hz(ROOT - 24);
+            o.detune.value = cents;
+            var g = ctx.createGain();
+            g.gain.value = 0.05;
+            o.connect(g);
+            g.connect(filter);
+            o.start();
+            drones.push(o);
+          });
+        }
+
+        function playNote(midi, time) {
+          var env = ctx.createGain();
+          env.gain.setValueAtTime(0, time);
+          env.gain.linearRampToValueAtTime(0.22, time + 0.008);
+          env.gain.exponentialRampToValueAtTime(0.001, time + STEP * 2.4);
+          env.connect(filter);
+          env.connect(delay);
+
+          [-7, 7].forEach(function(cents) {
+            var o = ctx.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.value = hz(midi);
+            o.detune.value = cents;
+            o.connect(env);
+            o.start(time);
+            o.stop(time + STEP * 2.6);
+          });
+        }
+
+        // Standard Web Audio pattern: a coarse timer that schedules notes slightly
+        // ahead of time, because setInterval on its own is far too jittery for this.
+        function scheduler() {
+          while (nextNoteTime < ctx.currentTime + 0.12) {
+            playNote(ROOT + PATTERN[step % PATTERN.length], nextNoteTime);
+            if (step % 8 === 0) playNote(ROOT - 12 + PATTERN[step % PATTERN.length], nextNoteTime);
+            nextNoteTime += STEP;
+            step++;
+          }
+        }
+
+        return {
+          start: function() {
+            if (!ctx) build();
+            if (ctx.state === 'suspended') ctx.resume();
+            if (started) return;
+            started = true;
+            master.gain.cancelScheduledValues(ctx.currentTime);
+            master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+            master.gain.linearRampToValueAtTime(PEAK, ctx.currentTime + 2.5);
+            nextNoteTime = ctx.currentTime + 0.1;
+            timer = setInterval(scheduler, 25);
+          },
+          stop: function() {
+            if (!ctx || !started) return;
+            started = false;
+            clearInterval(timer); timer = null;
+            master.gain.cancelScheduledValues(ctx.currentTime);
+            master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+            master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4);
+          },
+          fadeOut: function() {
+            if (!ctx || !started) return;
+            started = false;
+            master.gain.cancelScheduledValues(ctx.currentTime);
+            master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+            master.gain.linearRampToValueAtTime(0, ctx.currentTime + 3);
+            setTimeout(function() { clearInterval(timer); timer = null; }, 3200);
+          },
+          // 0 during detection, 1 once cases break through. Opens the filter up so
+          // the breach actually sounds like something gave way.
+          setIntensity: function(v) {
+            if (!ctx || !started) return;
+            filter.frequency.cancelScheduledValues(ctx.currentTime);
+            filter.frequency.linearRampToValueAtTime(700 + v * 1400, ctx.currentTime + 1.5);
+            feedback.gain.linearRampToValueAtTime(0.34 + v * 0.14, ctx.currentTime + 1.5);
+          }
+        };
+      })();
+
+      // Ease the sound out when a wave finishes instead of cutting it dead.
+      function fadeOutAudio() {
+        if (!audioPlaying) return;
+        Synth.fadeOut();
+        audioPlaying = false;
+        audioToggle.textContent = '🔇';
+        audioToggle.title = 'Unmute audio';
+        audioToggle.classList.remove('active');
+      }
 
       audioToggle.addEventListener('click', function() {
         if (audioPlaying) {
-          bgAudio.pause();
+          Synth.stop();
           audioPlaying = false;
           audioToggle.textContent = '🔇';
+          audioToggle.title = 'Unmute audio';
           audioToggle.classList.remove('active');
         } else {
-          bgAudio.play().catch(function() {});
+          Synth.start();
           audioPlaying = true;
           audioToggle.textContent = '🔊';
+          audioToggle.title = 'Mute audio';
           audioToggle.classList.add('active');
         }
       });
@@ -1816,20 +2008,43 @@
       document.getElementById('info-close').addEventListener('click', function() {
         infoPanel.classList.remove('visible');
       });
+      document.getElementById('info-x').addEventListener('click', function() {
+        infoPanel.classList.remove('visible');
+      });
 
       // ============================================
       // LEAD TIME TOGGLE (lightning bolt)
       // ============================================
       var ltToggle = document.getElementById('lead-time-toggle');
-      var ltData = null; // stored lead time HTML for re-showing
+
+      // Kept in one place so the button icon always matches whether the panel is
+      // open, no matter whether the narrative opened it or the user did.
+      function setLeadTimeVisible(on) {
+        var el = document.getElementById('lead-time-annotation');
+        var btn = document.getElementById('lead-time-toggle');
+        el.classList.toggle('visible', on);
+        btn.textContent = on ? '✕' : '⚡';
+        btn.title = on ? 'Hide lead time data' : 'Show lead time data';
+      }
 
       ltToggle.addEventListener('click', function() {
         var ltEl = document.getElementById('lead-time-annotation');
         if (ltEl.classList.contains('visible')) {
-          ltEl.classList.remove('visible');
-        } else {
-          ltEl.classList.add('visible');
+          setLeadTimeVisible(false);
+          return;
         }
+        // Rebuild the full list every time, so scrubbing to a point mid-story still
+        // shows all measured lead times instead of whichever one fired last.
+        var lt = VARIANTS[currentVariantId].leadTimes;
+        if (lt) {
+          var states = Object.keys(lt).sort(function(a, b) {
+            return lt[b].days - lt[a].days;
+          });
+          document.getElementById('lead-time-text').innerHTML = states.map(function(st) {
+            return '⚡ ' + lt[st].label;
+          }).join('<br>');
+        }
+        setLeadTimeVisible(true);
       });
 
       // ============================================
@@ -1862,6 +2077,8 @@
       // Start screen — triggers entry animation for whichever variant is loaded
       startOverlay.addEventListener('click', function() {
         startOverlay.classList.add('hidden');
+        // This click is the user gesture that lets the audio start.
+        if (audioPlaying) { Synth.start(); }
         setTimeout(function() {
           updateFrame();
           setTimeout(function() {
@@ -1874,7 +2091,7 @@
       });
 
       // Initial load (normal orientation, waiting for user)
-      loadVariant('delta');
+      loadVariant('omicron');
       console.log('Upside Down ready.');
     }
 

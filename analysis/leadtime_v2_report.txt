@@ -1,0 +1,59 @@
+COVERAGE (share of state population served by sampled plants)
+  st  sites  coverage   status
+  IL     71     62.2%   included
+  MN     27     60.3%   included
+  MO     51     51.5%   included
+  OR     33     51.1%   included
+  MA      1     34.1%   EXCLUDED
+  WI     33     22.9%   included
+  GA     17     22.0%   included
+  UT      2     21.9%   EXCLUDED
+  WV     24     21.8%   included
+  NJ      2     16.7%   EXCLUDED
+  AL      5     12.5%   EXCLUDED
+  NV      2     11.3%   EXCLUDED
+  KY      1      9.4%   EXCLUDED
+  KS      5      9.1%   EXCLUDED
+  NY      9      7.4%   EXCLUDED
+  ME      1      4.8%   EXCLUDED
+  MT      2      3.6%   EXCLUDED
+  NC      4      3.6%   EXCLUDED
+  IN      4      3.5%   EXCLUDED
+  PA      3      3.3%   EXCLUDED
+  TX      8      3.3%   EXCLUDED
+  ID      1      2.7%   EXCLUDED
+  FL      5      2.7%   EXCLUDED
+  MD      2      2.3%   EXCLUDED
+  NH      1      2.2%   EXCLUDED
+  IA      2      1.6%   EXCLUDED
+  AZ      7      1.2%   EXCLUDED
+  CO      2      1.0%   EXCLUDED
+
+=== Omicron ===
+  REPORTABLE LEAD (adequate coverage):
+    Illinois        1 week  r=0.90 gain=+0.25 n=13 sites=71 cov=62.2%
+    Wisconsin       1 week  r=0.89 gain=+0.10 n=15 sites=33 cov=22.9%
+    Oregon          1 week  r=0.82 gain=+0.04 n=23 sites=33 cov=51.1%
+  NO LEAD (adequate coverage, peaks at lag 0):
+    West Virginia   0 weeks  r=0.94 n=24 sites=24 cov=21.8%
+  DROPPED for thin coverage (would have been reported before):
+    Idaho           3 weeks r=0.99 sites= 1 cov=2.7%
+    Montana         2 weeks r=0.81 sites= 2 cov=3.6%
+    Arizona         1 week  r=0.70 sites= 7 cov=1.2%
+    Nevada          1 week  r=0.75 sites= 2 cov=11.3%
+
+=== BA.5 ===
+  REPORTABLE LEAD (adequate coverage):
+    Georgia         1 week  r=0.92 gain=+0.05 n=27 sites=17 cov=22.0%
+  NO LEAD (adequate coverage, peaks at lag 0):
+    West Virginia   0 weeks  r=0.92 n=30 sites=24 cov=21.8%
+    Wisconsin       0 weeks  r=0.87 n=30 sites=33 cov=22.9%
+    Oregon          0 weeks  r=0.86 n=30 sites=33 cov=51.1%
+    Illinois        0 weeks  r=0.81 n=30 sites=71 cov=62.2%
+  DROPPED for thin coverage (would have been reported before):
+    Arizona         2 weeks r=0.85 sites= 7 cov=1.2%
+    Idaho           2 weeks r=0.92 sites= 1 cov=2.7%
+    Montana         2 weeks r=0.96 sites= 2 cov=3.6%
+    Texas           1 week  r=0.89 sites= 8 cov=3.3%
+
+wrote leadtime_v2.json

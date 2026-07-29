@@ -4,7 +4,9 @@ An animated, web-based narrative visualization that uses a *Stranger Things*-ins
 
 ## Overview
 
-This visualization renders two transparent deck.gl map layers — a red wastewater detection layer and a blue clinical surface layer — that separate and rejoin in 3D space to dramatize the moment underground signals breach into visible outbreaks. A synchronized ridgeline plot encodes regional lead times, and guided narrative annotations walk viewers through three major variant waves (Delta, Omicron, BA.5).
+This visualization renders two transparent deck.gl map layers — a red wastewater detection layer and a blue clinical surface layer — that separate and rejoin in 3D space to dramatize the moment underground signals breach into visible outbreaks. A synchronized ridgeline plot encodes regional lead times, and guided narrative annotations walk viewers through two major variant waves (Omicron and BA.5).
+
+Lead times shown in the visualization are computed by cross-correlating weekly wastewater viral percentile against weekly clinical cases; see [`analysis/`](analysis/). The Delta wave was removed because CDC NWSS percentile reporting does not begin until 2021-11-15, so no viral intensity data exists for that window.
 
 ## Prerequisites
 
@@ -28,14 +30,14 @@ python -m http.server 8080
 
 3. Open your browser and navigate to:
 
-- **Visualization:** `http://localhost:8080/project`
-- **Pictorial:** `http://localhost:8080/project/pictorial.html`
+- **Visualization:** `http://localhost:8080/`
+- **Pictorial:** `http://localhost:8080/pictorial.html`
 
 4. Click **"Enter the Upside Down"** to begin the guided animation.
 
 ## Viewing the Pictorial
 
-The pictorial is a VISAP-format visual essay documenting the design process and visual encoding decisions. To view it, navigate to `http://localhost:8080/project/pictorial.html` in Chrome. To export as PDF, press `Ctrl+P`, set margins to **None**, and select **Save as PDF**.
+The pictorial is a VISAP-format visual essay documenting the design process and visual encoding decisions. To view it, navigate to `http://localhost:8080/pictorial.html` in Chrome. To export as PDF, press `Ctrl+P`, set margins to **None**, and select **Save as PDF**.
 
 ## Project Structure
 
@@ -50,21 +52,25 @@ project/
 │   ├── state_cases_weekly.json  # Weekly clinical cases per state
 │   ├── region_weekly.json  # Regional aggregations for ridgeline plot
 │   └── region_order.json   # Region display ordering
-└── audio/
-    └── stranger-things-theme.mp3  # Did not end up including audio 
+└── analysis/               # Lead-time cross-correlation scripts and output 
 ```
 
 ## Usage
 
 **Guided playback:** Click "Enter the Upside Down" and the animation plays automatically through a five-act narrative structure with auto-pause on key story moments.
 
-**Variant selection:** Use the Delta, Omicron, and BA.5 buttons at the top to switch between variant waves. Each variant resets the visualization with its own narrative text, zoom targets, and lead time annotations.
+**Variant selection:** Use the Omicron and BA.5 buttons at the top to switch between variant waves. Each variant resets the visualization with its own narrative text, zoom targets, and lead time annotations.
 
 **Manual scrubbing:** Use the timeline slider at the bottom to scrub to any point in the variant's timeline. The visualization instantly updates to the correct state.
 
 **Ridgeline plot:** Toggle with the 📊 button. Hover over a region to highlight its wastewater and clinical curves. The horizontal gap between peaks encodes the lead time.
 
 **Speed control:** Click the speed button (1x / 1.5x / 3x) to adjust playback speed.
+
+**Audio:** Toggle with the 🔊 button. There is no sound file. The score is generated live
+in the browser with the Web Audio API, as an original arpeggio played on detuned sawtooth
+oscillators through a resonant low-pass filter. The filter opens up at the breach and the
+sound fades out when a wave finishes.
 
 ## Tech Stack
 

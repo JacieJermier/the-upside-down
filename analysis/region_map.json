@@ -1,0 +1,46 @@
+{
+  "Appalachian": [
+    "WV"
+  ],
+  "Lower Midwest": [
+    "IA",
+    "IL",
+    "IN",
+    "KS",
+    "MO"
+  ],
+  "Mountain": [
+    "CO",
+    "ID",
+    "MT",
+    "NV",
+    "UT"
+  ],
+  "Northeast": [
+    "AL",
+    "AZ",
+    "CO",
+    "ID",
+    "NH",
+    "TX",
+    "UT"
+  ],
+  "Pacific NW": [
+    "OR"
+  ],
+  "Southeast": [
+    "AL",
+    "FL",
+    "GA",
+    "KY",
+    "NC"
+  ],
+  "Southwest": [
+    "AZ",
+    "TX"
+  ],
+  "Upper Midwest": [
+    "MN",
+    "WI"
+  ]
+}

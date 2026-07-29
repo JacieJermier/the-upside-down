@@ -1,0 +1,58 @@
+%% Paste-ready replacement for Section 3 "Testing the Frame" in main.tex.
+%% Replaces everything from "Lead time values in our first version" through the
+%% paragraph ending "...encoding something real.", including the table.
+
+\section{Testing the Frame}
+
+Lead time values in our first version were conservative manual estimates rather
+than statistically computed values. We replaced them with a cross-correlation of
+weekly wastewater percentile against weekly clinical cases. Three things came out
+of that.
+
+The first is that the Delta wave had to be removed. CDC NWSS percentile reporting
+does not begin until 15 November 2021, so the entire Delta window contains no
+viral intensity data. Delta had been our flagship wave and it carried most of our
+figures. The visualization had been rendering it confidently the whole time.
+Nothing in the design forced the metaphor to break, which is the exact failure we
+are warning about.
+
+The second is that our strongest numbers came from our weakest data. Ranked on
+correlation alone, Idaho led Omicron by three weeks at $r = 0.99$. Idaho has one
+sampled treatment plant serving about 2.7\% of the state. We now report a state
+only when its sampled plants cover at least 15\% of the population across five or
+more sites. Every large lead time we had disappeared under that rule.
+
+The third is that what survives is real but modest (Table~\ref{tab:leads}). Where
+a lead exists it is about one week, which sits inside the published range rather
+than beyond it. During BA.5 most adequately covered states showed no lead at all,
+and West Virginia showed none in either wave.
+
+\begin{table}[t]
+  \centering
+  \caption{Lead times from cross-correlation of weekly wastewater viral
+  percentile against weekly clinical cases, for states where sampled plants cover
+  at least 15\% of the population. Coverage is that share. A lead of none means
+  the correlation peaks at lag 0.}
+  \label{tab:leads}
+  \begin{tabular}{llccc}
+    \toprule
+    State & Wave & Coverage & Lead & $r$ \\
+    \midrule
+    Illinois      & Omicron & 62\% & 1 week        & 0.90 \\
+    Oregon        & Omicron & 51\% & 1 week        & 0.82 \\
+    Wisconsin     & Omicron & 23\% & 1 week        & 0.89 \\
+    Georgia       & BA.5    & 22\% & 1 week        & 0.92 \\
+    Illinois      & BA.5    & 62\% & \textbf{none} & 0.81 \\
+    Wisconsin     & BA.5    & 23\% & \textbf{none} & 0.87 \\
+    West Virginia & Omicron & 22\% & \textbf{none} & 0.94 \\
+    West Virginia & BA.5    & 22\% & \textbf{none} & 0.92 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+This unevenness is not a flaw in the visualization but a reflection of the
+real-world variability documented by Kumar et al.~\cite{kumar2022}. We now show
+Appalachia and West Virginia rather than leaving them out
+(Fig.~\ref{fig:counter}). In those rows the two curves sit on top of each other
+and the layers have nothing to separate. The frame fails in public, which is the
+strongest evidence we have that it was encoding something real.
