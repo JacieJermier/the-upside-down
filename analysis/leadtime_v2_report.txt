@@ -57,3 +57,4 @@ COVERAGE (share of state population served by sampled plants)
     Texas           1 week  r=0.89 sites= 8 cov=3.3%
 
 wrote leadtime_v2.json
+wrote ../data/state_coverage.json

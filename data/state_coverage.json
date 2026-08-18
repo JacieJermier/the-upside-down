@@ -1,0 +1,114 @@
+{
+  "AL": {
+    "coverage": 0.1248,
+    "sites": 5
+  },
+  "AZ": {
+    "coverage": 0.0122,
+    "sites": 7
+  },
+  "CO": {
+    "coverage": 0.0104,
+    "sites": 2
+  },
+  "FL": {
+    "coverage": 0.0272,
+    "sites": 5
+  },
+  "GA": {
+    "coverage": 0.2204,
+    "sites": 17
+  },
+  "IA": {
+    "coverage": 0.0156,
+    "sites": 2
+  },
+  "ID": {
+    "coverage": 0.0275,
+    "sites": 1
+  },
+  "IL": {
+    "coverage": 0.6218,
+    "sites": 71
+  },
+  "IN": {
+    "coverage": 0.0348,
+    "sites": 4
+  },
+  "KS": {
+    "coverage": 0.0909,
+    "sites": 5
+  },
+  "KY": {
+    "coverage": 0.0941,
+    "sites": 1
+  },
+  "MA": {
+    "coverage": 0.3414,
+    "sites": 1
+  },
+  "MD": {
+    "coverage": 0.0235,
+    "sites": 2
+  },
+  "ME": {
+    "coverage": 0.0477,
+    "sites": 1
+  },
+  "MN": {
+    "coverage": 0.6035,
+    "sites": 27
+  },
+  "MO": {
+    "coverage": 0.5153,
+    "sites": 51
+  },
+  "MT": {
+    "coverage": 0.0363,
+    "sites": 2
+  },
+  "NC": {
+    "coverage": 0.036,
+    "sites": 4
+  },
+  "NH": {
+    "coverage": 0.0218,
+    "sites": 1
+  },
+  "NJ": {
+    "coverage": 0.1672,
+    "sites": 2
+  },
+  "NV": {
+    "coverage": 0.1134,
+    "sites": 2
+  },
+  "NY": {
+    "coverage": 0.0743,
+    "sites": 9
+  },
+  "OR": {
+    "coverage": 0.5108,
+    "sites": 33
+  },
+  "PA": {
+    "coverage": 0.0335,
+    "sites": 3
+  },
+  "TX": {
+    "coverage": 0.0327,
+    "sites": 8
+  },
+  "UT": {
+    "coverage": 0.2185,
+    "sites": 2
+  },
+  "WI": {
+    "coverage": 0.2295,
+    "sites": 33
+  },
+  "WV": {
+    "coverage": 0.2179,
+    "sites": 24
+  }
+}

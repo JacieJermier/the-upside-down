@@ -152,3 +152,12 @@ with open(os.path.join(HERE, 'leadtime_v2.json'), 'w') as f:
     json.dump({'coverage': {k: round(v * 100, 1) for k, v in coverage.items()},
                'sites': nsites, 'results': out}, f, indent=2)
 print('wrote leadtime_v2.json')
+
+# The visualization reads this to decide how stable a site should look. A state
+# where almost nothing is sampled has no business rendering as confidently as one
+# where most of the population is.
+cov_out = {st: {'coverage': round(coverage[st], 4), 'sites': nsites[st]}
+           for st in sorted(STATE_POP)}
+with open(os.path.join(DATA, 'state_coverage.json'), 'w') as f:
+    json.dump(cov_out, f, indent=2)
+print('wrote ../data/state_coverage.json')

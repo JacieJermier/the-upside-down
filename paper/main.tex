@@ -16,7 +16,7 @@
 \vgtcinsertpkg
 
 %% ---------------------------------------------------------------------------
-\title{Structure Before Style. Choosing a Science Fiction Frame\\ That Matches the Data}
+\title{The Lead-Lag Layer Stack. Encoding Temporal\\ Precedence as Spatial Depth}
 
 \author{Jacie Jermier\thanks{jjermier@uwaterloo.ca}\\ %
         \scriptsize University of Waterloo}
@@ -24,29 +24,26 @@
 \abstract{%
 Wastewater surveillance can detect SARS-CoV-2 outbreaks days to weeks before
 clinical case counts rise, yet existing public-facing dashboards communicate this
-lead time through static line charts and choropleth maps. We present \emph{The
-Upside Down}, a narrative visualization that uses a \emph{Stranger Things}
-inspired figurative frame to make the lead-lag relationship between wastewater
-signals and clinical cases intuitively accessible. We argue that a science
-fiction frame should be chosen for how well its structure maps onto the data
-relationship, not for whether the theme feels relevant. Testing our own frame
-against computed lead times forced us to drop our most dramatic variant wave and
-to show a region where the early warning story is false.%
+lead time through static line charts and choropleth maps. We describe two
+encodings for lead-lag relationships in spatiotemporal data. A \emph{lead-lag
+layer stack} renders two co-registered map layers that separate in depth, so
+temporal precedence is read spatially. A \emph{paired lead-lag ridgeline} draws
+the measured lag between two curves as a span rather than leaving it to the eye.
+We demonstrate both in \emph{The Upside Down}, a narrative visualization of
+COVID-19 wastewater surveillance framed by \emph{Stranger Things}, and we report
+the places where the encodings fail.%
 }
 
-\keywords{Narrative visualization, figurative frames, science fiction,
-wastewater surveillance, early warning.}
+\keywords{Lead-lag encoding, spatiotemporal visualization, figurative frames,
+science fiction, wastewater surveillance.}
 
-%% Teaser is Figure 1, the 65 degree tilt with both layers separated.
-%% Upload the image, then swap the placeholder below for the \includegraphics line.
 \teaser{
   \centering
-  % \includegraphics[width=\linewidth]{figs/fig1-tilt}
-  \fbox{\parbox[c][1.5in][c]{\linewidth}{\centering\textsf{[Fig.~1, 65 degree tilt with both layers separated in Z]}}}
-  \caption{The core visual metaphor. The scene tilts to 65 degrees, revealing two
-  transparent map layers stacked in Z-space. The blue surface layer is the
-  visible clinical world. The red layer underneath is the Upside Down, where
-  wastewater detects viral signals before hospitals see a surge.}
+  \includegraphics[width=\linewidth]{Figures/figure_1.png}
+  \caption{The lead-lag layer stack. Two co-registered map layers tilt to 65
+  degrees and separate in Z-space. The lower red layer carries the leading signal,
+  wastewater detection, and the upper blue layer the lagging one, clinical cases.
+  Flat they coincide. Tilted, the depth between them is the relationship.}
   \label{fig:teaser}
 }
 %% ---------------------------------------------------------------------------
@@ -54,160 +51,174 @@ wastewater surveillance, early warning.}
 \begin{document}
 \maketitle
 
-\section{Position}
+\section{Contribution}
 
 Infected individuals shed SARS-CoV-2 RNA into wastewater before symptoms appear
-and before they seek testing~\cite{daoust2021,peccia2020}. Public health
-authorities can therefore detect outbreaks days to weeks earlier than
-hospital-based reporting allows~\cite{kumar2022}.
+and before they seek testing~\cite{daoust2021,peccia2020}, so outbreaks can be
+detected days to weeks earlier than hospital reporting
+allows~\cite{kumar2022}. Existing visualizations of this data remain limited to
+time-series overlays and choropleth maps. They are analytically useful for
+experts but fail to show what makes the data compelling. The virus was detectable
+underground long before it showed up in hospitals.
 
-Existing visualizations of wastewater surveillance have remained limited to
-time-series overlays and choropleth maps. These representations are analytically
-useful for experts but fail to show what makes this data so compelling. The virus
-was detectable underground days to weeks before it ever showed up in hospitals.
+The problem is not specific to COVID-19. Wherever one spatial signal reliably
+precedes another across the same geography, a visualization must convey both
+where the signals are and which arrived first. We contribute two encodings.
 
-The \emph{Stranger Things} metaphor fits here because viewers already understand
-the show's central concept of a parallel dimension occupying the same physical
-space.
+A \textbf{lead-lag layer stack} draws the two signals as transparent,
+co-registered planes. Flat they coincide, and the display reads as an ordinary
+map. Tilted they separate in depth, and the gap between them is the relationship
+(Fig.~\ref{fig:teaser}). Precedence becomes something a viewer reads spatially
+rather than infers from two adjacent charts.
 
-Our position is that figurative frames in visualization are not merely aesthetic
-choices but structural decisions that shape how viewers interpret data
-relationships~\cite{byrne2019}. The Upside Down metaphor does not just decorate
-the lead-lag relationship. It makes that relationship spatial by placing the
-virus below in wastewater before it appears above in hospitals. Choosing a
-metaphor should be driven by how well the metaphor's structure maps onto the data
-relationship, not just whether the theme feels relevant.
+A \textbf{paired lead-lag ridgeline} stacks one row per region, each carrying a
+filled curve for the leading signal and a dashed curve for the lagging one. The
+measured lag is drawn as a labelled span across the row (Fig.~\ref{fig:ridge}),
+so the quantity the plot exists to communicate is stated rather than estimated.
 
-That claim gives us a way to test a frame. If the metaphor really does encode the
-relationship, it should visibly break wherever the data stops holding.
+\section{Related Work}
 
-\section{System}
+Tilt has been used before to move between map representations. Yang et
+al.~\cite{tiltmap} transition between choropleth map, prism map and bar chart in
+immersive environments, treating tilt as the interaction that swaps one
+representation for another. Our tilt does something different. The representation
+never changes. Tilting exposes a depth separation that was already carrying the
+lead time, so the gesture reveals structure rather than substituting a chart.
 
-The core visual metaphor uses two transparent deck.gl map layers rendered inside
-a shared 3D scene. The bottom layer, the Upside Down, renders U.S. state outlines
-in red, overlaid with wastewater detection dots whose radius and brightness
-encode viral RNA percentile intensity and population served
-(Fig.~\ref{fig:detection}). The top layer, the surface, renders identical
-outlines in blue, overlaid with procedurally generated crack paths whose severity
-encodes clinical case intensity weighted by the wastewater signal at each site.
-This means the places where wastewater detected the most virus are the places
-that crack hardest when clinical cases arrive. When the scene is flat the two
-layers overlap perfectly. When tilted to 65 degrees they separate in Z-space,
-revealing the void between the two worlds (Fig.~\ref{fig:teaser}).
+The structure itself is familiar in the earth sciences, where subsurface
+precursors such as seismic swarms, ground deformation and gas emissions precede
+eruptions by a measurable interval~\cite{usgs}. Those systems generally infer the
+subsurface from the surface. Wastewater surveillance runs the other way, using a
+buried signal to anticipate a surface one, which is why the two-layer arrangement
+fits it so directly.
 
-A D3.js ridgeline plot stacks regional rows. Each row contains a filled
-wastewater curve in red and a dashed clinical curve in blue, and the horizontal
-displacement between their peaks directly encodes the lead time for that region
-(Fig.~\ref{fig:ridge}).
+\section{What the Frame Encodes}
 
-Our design follows Segel and Heer's martini glass structure~\cite{segel2010}. The
-lead-lag relationship only makes sense if the viewer first sees the wastewater
-phase before the clinical phase.
+The \emph{Stranger Things} reference operates at two levels, and separating them
+matters.
 
-\begin{figure}[t]
-  \centering
-  % \includegraphics[width=\columnwidth]{figs/fig2-detection}
-  \fbox{\parbox[c][1.1in][c]{0.96\columnwidth}{\centering\textsf{[Fig.~2, Omicron detection phase]}}}
-  \caption{During the detection phase, wastewater sampling sites appear as
-  glowing red dots. At this point hospitals have not yet registered the coming
-  surge.}
-  \label{fig:detection}
-\end{figure}
+The first is structural. The show's premise is a parallel dimension occupying the
+same physical space as the visible world, where threats become detectable before
+they surface. That premise is not decoration here. It is the encoding, because it
+is the same shape as the data relationship. Byrne et al.~\cite{byrne2019} argue
+that figurative elements extend a visualization's expressive range beyond
+decoration. We would add that a figurative \emph{structure} can carry the encoding
+itself, which is a stronger claim than an element carrying meaning alongside one.
+
+The second level is the figurative elements proper, and they do not all do the
+same work. Some encode magnitude. Sites are dots whose radius and brightness
+follow viral percentile and population served (Fig.~\ref{fig:detection}), and
+outbreaks are cracks whose severity combines a state's case intensity with the
+wastewater signal at each site, so the places that detected most crack hardest.
+Others encode nothing and exist for atmosphere, including the dust in the void
+between the layers and the typography.
+
+One element encodes uncertainty, and it is the most useful of the three.
+Wastewater coverage is severely uneven. Idaho contributes one sampled plant
+serving under three percent of the state, Illinois seventy-one covering
+sixty-two. Sites in thinly covered states are therefore drawn dim and unstable,
+dropping in and out as the timeline advances, the way the lights do in the show
+when something is only just getting through. Coverage becomes legible before any
+number is read, and a barely monitored place can no longer pass for a well
+monitored one.
 
 \section{Testing the Frame}
 
-Lead time values in our first version were conservative manual estimates rather
-than statistically computed values. We replaced them with a cross-correlation of
-weekly wastewater percentile against weekly clinical cases. Two things came out
-of that.
+Replacing our original manual lead-time estimates with cross-correlation of weekly
+wastewater percentile against weekly cases changed the paper twice.
 
-The first is that the Delta wave had to be removed. CDC NWSS percentile reporting
-does not begin until 15 November 2021, so the entire Delta window contains no
-viral intensity data. Delta had been our flagship wave and it carried most of our
-figures. The visualization had been rendering it confidently the whole time.
-Nothing in the design forced the metaphor to break, which is the exact failure we
-are warning about.
+First, the Delta wave had to be removed. CDC NWSS percentile reporting does not
+begin until 15 November 2021, so the entire Delta window contains no viral
+intensity data. Delta had been our flagship wave and carried most of our figures,
+and the visualization had been rendering it confidently the whole time. Nothing in
+the design forced the metaphor to break, which is the exact failure we warn about.
 
-The second is that wastewater surveillance does not produce a clean and uniform
-lead time across every state and region (Table~\ref{tab:leads}). Idaho led
-Omicron by three weeks and Arizona led BA.5 by two. West Virginia led neither.
-Its correlation peaks at lag 0 in both waves, which means the wastewater signal
-and the clinical signal move together. There is no underground.
+Second, our strongest numbers came from our weakest data. Ranked on correlation
+alone, Idaho led Omicron by three weeks at $r = 0.99$, on one plant. We now report
+a state only when its sampled plants cover at least 15\% of the population across
+five or more sites, and every large lead time disappeared under that rule. What
+survives is modest (Table~\ref{tab:leads}). Where a lead is measurable it is about
+one week, and during BA.5 most adequately covered states fell below that.
+
+This is where the encoding meets its own floor. Our wastewater readings are daily,
+but the case counts are weekly, and a lag can never be finer than the coarser of
+the two series. Published leads run from roughly two to eight
+days~\cite{daoust2021,peccia2020}, which sits at or under seven. So a row reading
+under one week has not been shown to lack a lead. It has been shown to have one
+this data cannot resolve, and the frame cannot draw a gap the data cannot see.
 
 \begin{table}[t]
   \centering
   \caption{Lead times from cross-correlation of weekly wastewater viral
-  percentile against weekly clinical cases. A value of none means the correlation
-  peaks at lag 0.}
+  percentile against weekly clinical cases, for states where sampled plants cover
+  at least 15\% of the population. Weekly case data puts a seven day floor under
+  what can be resolved, so $<$1 week means the lead was too short to measure, not
+  that none exists.}
   \label{tab:leads}
-  \begin{tabular}{llcc}
+  \begin{tabular}{llccc}
     \toprule
-    Region or state & Wave & Lead & $r$ \\
+    State & Wave & Coverage & Lead & $r$ \\
     \midrule
-    Southwest      & BA.5    & 2 weeks       & 0.97 \\
-    Upper Midwest  & Omicron & 2 weeks       & 0.82 \\
-    Upper Midwest  & BA.5    & 2 weeks       & 0.81 \\
-    Idaho          & Omicron & 3 weeks       & 0.99 \\
-    Appalachian    & Omicron & \textbf{none} & 0.95 \\
-    West Virginia  & BA.5    & \textbf{none} & 0.92 \\
+    Illinois      & Omicron & 62\% & 1 week           & 0.90 \\
+    Oregon        & Omicron & 51\% & 1 week           & 0.82 \\
+    Wisconsin     & Omicron & 23\% & 1 week           & 0.89 \\
+    Georgia       & BA.5    & 22\% & 1 week           & 0.92 \\
+    Illinois      & BA.5    & 62\% & \textbf{$<$1 wk} & 0.81 \\
+    West Virginia & Omicron & 22\% & \textbf{$<$1 wk} & 0.94 \\
+    West Virginia & BA.5    & 22\% & \textbf{$<$1 wk} & 0.92 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-This unevenness is not a flaw in the visualization but a reflection of the
-real-world variability documented by Kumar et al.~\cite{kumar2022}. We now show
-Appalachia and West Virginia rather than leaving them out
-(Fig.~\ref{fig:counter}). In those rows the two curves sit on top of each other
-and the layers have nothing to separate. The frame fails in public, which is the
-strongest evidence we have that it was encoding something real.
-
 \begin{figure}[t]
   \centering
-  % \includegraphics[width=\columnwidth]{figs/fig3-ridge-uppermidwest}
-  \fbox{\parbox[c][1.0in][c]{0.96\columnwidth}{\centering\textsf{[Fig.~3, ridgeline with Upper Midwest highlighted]}}}
-  \caption{The ridgeline plot with the Upper Midwest region highlighted on hover.
-  The horizontal gap between peaks is the two week lead.}
-  \label{fig:ridge}
+  \includegraphics[width=\columnwidth]{Figures/figure_2.png}
+  \caption{Detection phase. Wastewater sites appear as glowing dots before any
+  surface cracks. Sites in thinly sampled states render unstable rather than
+  confident.}
+  \label{fig:detection}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  % \includegraphics[width=\columnwidth]{figs/fig4-ridge-appalachian}
-  \fbox{\parbox[c][1.0in][c]{0.96\columnwidth}{\centering\textsf{[Fig.~4, ridgeline with Appalachian highlighted]}}}
+  \includegraphics[width=\columnwidth]{Figures/figure_3.png}
+  \caption{The paired lead-lag ridgeline. Each row carries a filled wastewater
+  curve and a dashed clinical curve. One row per wave is annotated as a worked
+  example, chosen because it is the region where the fitted lag and the visible
+  peak-to-peak gap agree.}
+  \label{fig:ridge}
+\end{figure}
+
+We show Appalachia and West Virginia rather than leaving them out
+(Fig.~\ref{fig:counter}). In those rows the two curves sit on top of each other
+and the layers have nothing to separate. This unevenness is not a flaw in the
+visualization but a reflection of the real variability documented by Kumar et
+al.~\cite{kumar2022}. The encoding fails in public, which is the strongest
+evidence we have that it was carrying something.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{Figures/figure_4.png}
   \caption{The counterexample. With Appalachian highlighted the two curves are
   coincident. No gap, no lead time, nothing for the layers to separate.}
   \label{fig:counter}
 \end{figure}
 
-\section{Discussion}
-
-\textbf{Pick frames by structural correspondence rather than thematic fit.} Many
-stories are epidemiologically evocative. Almost none of them place a hidden layer
-beneath a visible one in the same physical space, and that property is what does
-the work here.
-
-\textbf{A speculative frame should be able to fail.} Our metaphor's credibility
-rests on the regions where it does not hold. A speculative interface that cannot
-fail against real data is closer to concept art, which is valuable but a
-different contribution.
-
-\textbf{A fiction carries its source's blind spots.} The Upside Down implies that
-the underground always knows first. Before late 2021 there was no underground to
-look at because the sensors had not been installed yet. A frame that cannot
-express the absence of instrumentation will quietly imply coverage that never
-existed.
+This is the property we would ask of any speculative frame. Its credibility rests
+on the cases where it does not hold, and an interface that cannot fail against
+real data is closer to concept art, which is valuable but a different
+contribution.
 
 \section{Limitations}
 
-Lead times are computed from aggregated weekly series, and sewer transit time and
-sampling frequency are not modeled~\cite{kumar2022}. Temporal coverage spans
-Omicron and BA.5 only. The 3D tilt effect requires a modern browser with
-hardware-accelerated CSS transforms and WebGL support, which excludes older
-devices and some mobile browsers. We report correlations rather than causal lead
-estimates.
+The seven day resolution floor is the sharpest limit. Daily case counts would let
+the encoding address the range the literature actually reports, and we did not
+have them. Sewer transit time and sampling frequency are not
+modeled~\cite{kumar2022}, coverage spans Omicron and BA.5 only, the stack needs
+WebGL and hardware-accelerated transforms, and we report correlations rather than
+causal estimates.
 
 %% ---------------------------------------------------------------------------
-%% Manual bibliography, so no .bib file or BibTeX pass is needed.
 \begin{thebibliography}{9}
 
 \bibitem{byrne2019}
@@ -215,11 +226,6 @@ L.~Byrne, D.~Angus, and J.~Wiles.
 \newblock Figurative frames. A critical vocabulary for images in information
   visualization.
 \newblock {\em Information Visualization}, 18(1):45--67, 2019.
-
-\bibitem{cdc2026}
-Centers for Disease Control and Prevention.
-\newblock {NWSS} public {SARS-CoV-2} wastewater metric data, 2026.
-\newblock Accessed 16 Feb 2026.
 
 \bibitem{daoust2021}
 P.~M. D'Aoust et~al.
@@ -239,11 +245,17 @@ J.~Peccia et~al.
   infection dynamics.
 \newblock {\em Nature Biotechnology}, 38(10):1164--1167, 2020.
 
-\bibitem{segel2010}
-E.~Segel and J.~Heer.
-\newblock Narrative visualization. Telling stories with data.
+\bibitem{tiltmap}
+Y.~Yang, T.~Dwyer, K.~Marriott, B.~Jenny, and S.~Goodwin.
+\newblock Tilt map. Interactive transitions between choropleth map, prism map and
+  bar chart in immersive environments.
 \newblock {\em IEEE Transactions on Visualization and Computer Graphics},
-  16(6):1139--1148, 2010.
+  26(12):3577--3589, 2020. doi\string: 10.1109/TVCG.2020.3004137
+
+\bibitem{usgs}
+U.S. Geological Survey.
+\newblock Movement on the surface provides information about the subsurface.
+\newblock Volcano Hazards Program. Accessed 1 August 2026.
 
 \end{thebibliography}
 

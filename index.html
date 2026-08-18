@@ -142,12 +142,27 @@
       max-width: 700px; width: 90%;
     }
     #narrative-overlay.visible { opacity: 1; }
+    /* Two jobs in one shadow stack. The tight black layers are a halo that keeps the
+       glyphs legible wherever the map underneath is bright, and the wide coloured
+       layers are the actual glow. Without the black the red just smears into the
+       states behind it. */
     #narrative-text {
-      font-size: 28px; color: #ff4d4d;
-      text-shadow: 0 0 30px rgba(255,77,77,0.8),0 0 60px rgba(255,77,77,0.4);
+      font-size: 28px; color: #ff5f5f;
+      text-shadow:
+        0 0 3px rgba(0,0,0,0.95),
+        0 0 9px rgba(0,0,0,0.92),
+        0 0 24px rgba(255,77,77,0.9),
+        0 0 52px rgba(255,77,77,0.5);
       letter-spacing: 4px; text-transform: uppercase; line-height: 1.4;
     }
-    #narrative-subtext { font-size: 15px; color: #c2c2c2; margin-top: 10px; letter-spacing: 1.5px; line-height: 1.6; }
+    #narrative-subtext {
+      font-size: 16px; color: #e4e4e4; margin-top: 10px;
+      letter-spacing: 1.5px; line-height: 1.6;
+      text-shadow:
+        0 0 3px rgba(0,0,0,0.98),
+        0 0 8px rgba(0,0,0,0.95),
+        0 0 18px rgba(255,120,120,0.4);
+    }
 
     /* === EVENT ANNOTATION === */
     #event-annotation {
@@ -157,8 +172,11 @@
     }
     #event-annotation.visible { opacity: 1; }
     #event-text {
-      font-size: 13px; color: #ff9166;
-      text-shadow: 0 0 10px rgba(255,145,102,0.4);
+      font-size: 14px; color: #ffa279;
+      text-shadow:
+        0 0 3px rgba(0,0,0,0.95),
+        0 0 8px rgba(0,0,0,0.9),
+        0 0 16px rgba(255,145,102,0.65);
       letter-spacing: 2px; text-transform: uppercase;
       border-right: 2px solid #ff6a3d; padding-right: 10px;
     }
@@ -375,6 +393,7 @@
     .ridge-area-ww { fill: rgba(255,70,70,0.42); stroke: #ff5555; stroke-width: 2; }
     .ridge-area-cl { fill: rgba(90,205,255,0.28); stroke: #5ad2ff; stroke-width: 2; }
     .ridge-timeline { stroke: #ff5555; stroke-width: 1.4; opacity: 0.9; }
+
     /* Sits just above the ridgeline panel rather than inside it, so it never
        overlaps the curves. Fades in with the panel via the sibling selector. */
     #ridgeline-title {
@@ -472,7 +491,13 @@
       <p><strong>The Breach (3D tilt):</strong> When clinical cases surge, the scene tilts to 65° revealing two transparent map layers stacked in Z-space. The blue surface layer returns and lands on top of the red layer. Amber cracks then grow where the virus broke through to hospitals, with crack intensity reflecting how strong the wastewater signal was at each site.</p>
       <p><strong>Ridgeline plot:</strong> Shows wastewater signal (red filled) vs clinical cases (blue dashed) per region. The horizontal gap between peaks is the lead time.</p>
       <p><strong>Hover a region to compare it:</strong> Moving your cursor over any row brings that region forward in full colour while the others dim back. This is the easiest way to see how far ahead the red wastewater curve sits from the blue clinical curve. Where the two curves sit almost on top of each other, that region had no early warning at all.</p>
-      <p><strong>Lead times (⚡ button):</strong> Reveals the measured lead time for every state in the current wave. These are computed by cross-correlating weekly wastewater levels against weekly case counts, so a state listed as no lead is one where the two signals moved together.</p>
+      <p><strong>Lead times (⚡ button):</strong> Reveals the measured lead time for every state in the current wave, computed by cross-correlating weekly wastewater levels against weekly case counts.</p>
+      <h3>Two Ways to Measure a Lead</h3>
+      <p>The numbers in the lead time panel come from <strong>cross-correlation</strong>, which slides the entire wastewater curve forward and asks which shift best matches the whole clinical curve across every week in the wave. The gap you can <em>see</em> on the ridgeline is something else, the distance between two single points, the highest wastewater week and the highest clinical week.</p>
+      <p>On a clean curve with one peak the two agree. On a noisy or double-peaked curve they do not, which is why one region can show a two week correlation lag while its peaks sit in the same week. Only one region per wave is annotated with a span, chosen because it is the region where both measures agree, so the annotation never contradicts what your eye reads. The other rows are left clean for comparison.</p>
+      <p><strong>A hard limit:</strong> the case data is weekly, so no lead shorter than seven days can be measured here at all. Published studies put most lead times between two and eight days, which is at or below that floor. A region marked <em>under 1 week</em> has not been shown to lack a lead. It has been shown to have one too short for weekly data to resolve.</p>
+      <h3>Coverage and Unstable Signals</h3>
+      <p>Sampling is very uneven. Illinois has 71 treatment plants covering 62% of the state. Idaho has one covering under 3%. Sites in thinly covered states are drawn dim and flickering rather than solid, so a barely monitored place cannot pass for a well monitored one. Hover any dot to see its state's coverage.</p>
       <h3>Data Sources</h3>
       <p>CDC NWSS Public SARS-CoV-2 Wastewater Metric Data (2020 to 2022)<br>
       CDC Weekly COVID-19 Cases and Deaths by State</p>
@@ -505,6 +530,22 @@
         // Only regions where sampled plants cover a real share of the population.
         // Appalachian (West Virginia) is the honest counterexample, peaking at lag 0.
         ridgeRegions: ['Pacific NW', 'Upper Midwest', 'Lower Midwest', 'Appalachian'],
+        // One worked example per wave rather than an annotation on every row. Pacific
+        // NW is the clearest one to read, because its fitted lag and its visible
+        // peak-to-peak gap both land on the same week, so the bar ends exactly where
+        // the clinical curve peaks. The other rows are left clean for comparison.
+        exemplarRegion: 'Pacific NW',
+        exemplarLead: { weeks: 1, r: 0.82 },
+        // A deliberate second stop on a barely sampled state, so the unstable rendering
+        // gets a moment where it is the only thing on screen.
+        coverageZoom: {
+          // Arizona, not Idaho. Idaho's only plant does not report until January,
+          // well after this beat, so there was literally no dot to fly to. Arizona's
+          // seven plants all sit on one point in Yuma, bottom left of the state.
+          target: { longitude: -112.4, latitude: 33.8, zoom: 5.2, pitch: 0, bearing: 0 },
+          text: ['Not every state is watched',
+                 'Illinois has 71 treatment plants covering 62% of it. Arizona reports seven, all in one county, covering barely 1%, so its signal blinks instead of holding steady']
+        },
         // Cross-correlation of weekly wastewater percentile against weekly new cases,
         // restricted to states with at least 15% of population under surveillance and
         // 5 or more plants. See analysis/leadtime_v2.py.
@@ -512,7 +553,7 @@
           'IL': { days: 7, label: 'Illinois: 1 week early (r = 0.90)' },
           'WI': { days: 7, label: 'Wisconsin: 1 week early (r = 0.89)' },
           'OR': { days: 7, label: 'Oregon: 1 week early (r = 0.82)' },
-          'WV': { days: 0, label: 'West Virginia: no lead (r = 0.94)' }
+          'WV': { days: 0, label: 'West Virginia: under 1 week (r = 0.94)' }
         }
       },
       ba5: {
@@ -533,14 +574,25 @@
         earlyLeadOffset: 2,
         // Same four well-covered regions as Omicron, so the two waves are comparable.
         ridgeRegions: ['Pacific NW', 'Upper Midwest', 'Lower Midwest', 'Appalachian'],
+        // Appalachian is BA.5's counterexample. Its two curves crest together, so the
+        // bar collapses to almost nothing, which is the point being made.
+        exemplarRegion: 'Appalachian',
+        exemplarLead: { weeks: 0, r: 0.41 },
+        coverageZoom: {
+          // Montana here so the two waves do not use the same example. Both of its
+          // plants report from a single location in the centre of the state.
+          target: { longitude: -110.4, latitude: 47.0, zoom: 5.0, pitch: 0, bearing: 0 },
+          text: ['Not every state is watched',
+                 'Georgia has 17 treatment plants covering 22% of it. Montana reports two, from one location, covering under 4%, so its signal blinks instead of holding steady']
+        },
         // Georgia is the only adequately covered state that leads during BA.5.
         // The rest are shown precisely because they do not.
         leadTimes: {
           'GA': { days: 7, label: 'Georgia: 1 week early (r = 0.92)' },
-          'WV': { days: 0, label: 'West Virginia: no lead (r = 0.92)' },
-          'WI': { days: 0, label: 'Wisconsin: no lead (r = 0.87)' },
-          'OR': { days: 0, label: 'Oregon: no lead (r = 0.86)' },
-          'IL': { days: 0, label: 'Illinois: no lead (r = 0.81)' }
+          'WV': { days: 0, label: 'West Virginia: under 1 week (r = 0.92)' },
+          'WI': { days: 0, label: 'Wisconsin: under 1 week (r = 0.87)' },
+          'OR': { days: 0, label: 'Oregon: under 1 week (r = 0.86)' },
+          'IL': { days: 0, label: 'Illinois: under 1 week (r = 0.81)' }
         }
       }
     };
@@ -595,12 +647,14 @@
       var r = await Promise.all([
         fetch('./data/us-states.geojson'), fetch('./data/sites.json'),
         fetch('./data/site_weekly.json'), fetch('./data/state_cases_weekly.json'),
-        fetch('./data/region_weekly.json'), fetch('./data/region_order.json')
+        fetch('./data/region_weekly.json'), fetch('./data/region_order.json'),
+        fetch('./data/state_coverage.json')
       ]);
       return {
         states: await r[0].json(), sites: await r[1].json(),
         siteWeekly: await r[2].json(), stateCases: await r[3].json(),
-        regionWeekly: await r[4].json(), regionOrder: await r[5].json()
+        regionWeekly: await r[4].json(), regionOrder: await r[5].json(),
+        stateCoverage: await r[6].json()
       };
     }
 
@@ -624,6 +678,7 @@
       };
       var stateCases = data.stateCases, regionWeekly = data.regionWeekly;
       var regionOrder = data.regionOrder;
+      var stateCoverage = data.stateCoverage;
 
       // Build lookups
       var siteInfo = {}; sites.forEach(function(s) { siteInfo[s.wwtp_id] = s; });
@@ -935,8 +990,46 @@
       // ============================================
       // DOT COLORS (wastewater)
       // ============================================
+      // ============================================
+      // SIGNAL STABILITY
+      // A site in a state where almost nothing is sampled should not look as
+      // certain as one in a state that is thoroughly monitored. Below this share
+      // of a state's population the dots dim and start dropping in and out, the
+      // way the lights do in the show when something is only just getting through.
+      // ============================================
+      var STABLE_COVERAGE = 0.15;
+
+      function siteStability(d) {
+        var c = stateCoverage[d.state];
+        if (!c) return 1;
+        return Math.min(1, c.coverage / STABLE_COVERAGE);
+      }
+
+      // Driven by a timer rather than the week counter, because the coverage beat
+      // pauses playback and the flicker needs to keep moving while the viewer is
+      // looking straight at it.
+      var flickerTick = 0;
+
+      // A real blink rather than a gentle fade. The thinner the coverage, the more
+      // often the dot drops out entirely, so it reads as a signal struggling to hold
+      // against the steady dots of a well monitored state.
+      function stabilityAlphaScale(d) {
+        var s = siteStability(d);
+        if (s >= 1) return 1;
+        if (!stateSignalOn(d.state)) return 0;     // out with the rest of the state
+        return 0.7 + 0.3 * s;                      // on, still short of full coverage
+      }
+
+      // Unstable sites also shrink, so they read as uncertain even in a still frame
+      // where the flicker is not moving.
+      function stabilityRadiusScale(d) {
+        var s = siteStability(d);
+        return s >= 1 ? 1 : 0.55 + 0.45 * s;
+      }
+
       function getDotColor(d) {
         var alpha = d.stale ? 130 : 235;
+        alpha = Math.floor(alpha * stabilityAlphaScale(d));
         var p = d.percentile;
         if (p == null || isNaN(p)) {
           // Use detect_prop as fallback
@@ -949,17 +1042,18 @@
       }
 
       function getDotGlowColor(d) {
-        if (d.stale) return [200, 45, 45, 16];
-        var p = d.percentile; if (p == null || isNaN(p)) return [200, 45, 45, 24];
+        var k = stabilityAlphaScale(d);
+        if (d.stale) return [200, 45, 45, Math.floor(16 * k)];
+        var p = d.percentile; if (p == null || isNaN(p)) return [200, 45, 45, Math.floor(24 * k)];
         var t = p / 100;
-        return [255, 60 + t * 45, 55, Math.floor(30 + t * 75)];
+        return [255, 60 + t * 45, 55, Math.floor((30 + t * 75) * k)];
       }
 
       function getDotRadius(d) {
         var base = Math.max(3000, Math.sqrt(d.population_served || 5000) * 50);
         var p = d.percentile;
-        if (p == null || isNaN(p)) return base * 0.6;
-        return base * (0.5 + (p / 100) * 0.7);
+        if (p == null || isNaN(p)) return base * 0.6 * stabilityRadiusScale(d);
+        return base * (0.5 + (p / 100) * 0.7) * stabilityRadiusScale(d);
       }
 
       function getGlowRadius(d) {
@@ -1004,6 +1098,41 @@
       var currentViewState = { longitude: -96, latitude: 38, zoom: 3.5, pitch: 0, bearing: 0 };
 
       // Bottom layer (Upside Down) — red-toned, transparent background
+      // The geojson carries full state names, the coverage data uses abbreviations.
+      var STATE_ABBREV = {
+        'Alabama':'AL','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO',
+        'Connecticut':'CT','Delaware':'DE','District of Columbia':'DC','Florida':'FL',
+        'Georgia':'GA','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS',
+        'Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA',
+        'Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT',
+        'Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM',
+        'New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK',
+        'Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC',
+        'South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT',
+        'Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY'
+      };
+
+      function seedFor(abbrev) {
+        var n = 0;
+        for (var i = 0; i < abbrev.length; i++) n = n * 131 + abbrev.charCodeAt(i);
+        return n;
+      }
+
+      // One decision per state per tick, so the outline, the fill and the dots all go
+      // dark together. A state with thin coverage should read like a bulb going out,
+      // not like a dot winking on an otherwise lit map.
+      function stateSignalOn(abbrev) {
+        if (!abbrev) return true;
+        var c = stateCoverage[abbrev];
+        if (!c) return true;
+        var s = Math.min(1, c.coverage / STABLE_COVERAGE);
+        if (s >= 1) return true;
+        var r = mulberry32(seedFor(abbrev) * 7919 + flickerTick * 104729)();
+        return r >= (1 - s) * 0.55;
+      }
+
+      // The states themselves stay solid. Only the sampling dots blink, since they are
+      // what the coverage claim is actually about.
       var statesLayer = new deck.GeoJsonLayer({
         id: 'us-states', data: states,
         filled: true, stroked: true,
@@ -1112,6 +1241,25 @@
           }
         }
 
+        // Act 1b-ii: the coverage stop. This has to happen during detection, while the
+        // red layer is still the only thing on screen. After the breach the blue
+        // surface sits on top and the flickering dots are underneath it, invisible.
+        if (v.coverageZoom && preFlipPct > 0.55 && preFlipPct < 1 &&
+            !narrativeTriggered['coverage']) {
+          narrativeTriggered['coverage'] = true;
+          pause();
+          flyTo(Object.assign({}, v.coverageZoom.target, { duration: 4200 }));
+          setTimeout(function() {
+            showNarrative(v.coverageZoom.text[0], v.coverageZoom.text[1], 9000);
+          }, 4000);
+          // Hold on the thin state long enough to watch the dots drop in and out,
+          // then pull back so the breach still happens on the full map.
+          setTimeout(function() {
+            flyTo({ longitude: -96, latitude: 38, zoom: 3.5, pitch: 0, bearing: 0, duration: 3800 });
+            setTimeout(play, 3600);
+          }, 14000);
+        }
+
         // Act 1c: Pre-breach tension — right before the flip
         if (preFlipPct > 0.85 && preFlipPct < 1 && !narrativeTriggered['preBreach']) {
           narrativeTriggered['preBreach'] = true;
@@ -1158,14 +1306,14 @@
         }
         if (currentWeekIndex >= flipWeekIndex + 4 && !narrativeTriggered['zoom']) {
           narrativeTriggered['zoom'] = true;
-          flyTo(Object.assign({}, v.zoomTarget, { duration: 3000 }));
+          flyTo(Object.assign({}, v.zoomTarget, { duration: 4200 }));
           showRidgeline();
 
           // Show insight narrative during zoom
           if (v.insightNarrative) {
             setTimeout(function() {
-              showNarrative(v.insightNarrative[0], v.insightNarrative[1], 6000);
-            }, 3500);
+              showNarrative(v.insightNarrative[0], v.insightNarrative[1], 8500);
+            }, 4400);
           }
 
           // Show zoom state's lead time (skip if earlyLeadState already handled it)
@@ -1183,7 +1331,7 @@
         }
         if (currentWeekIndex >= flipWeekIndex + 12 && !narrativeTriggered['pullback']) {
           narrativeTriggered['pullback'] = true;
-          flyTo({ longitude: -96, latitude: 38, zoom: 3.5, pitch: 0, bearing: 0, duration: 3000 });
+          flyTo({ longitude: -96, latitude: 38, zoom: 3.5, pitch: 0, bearing: 0, duration: 4000 });
           setTimeout(hideRidgeline, 2000);
 
           // Show all states' lead times on zoom out (skip if earlyLeadState flow handles it)
@@ -1243,10 +1391,17 @@
               if (info.object) {
                 var o = info.object;
                 var pct = o.percentile != null ? o.percentile.toFixed(0) + '%' : 'N/A';
+                var cov = stateCoverage[o.state];
+                var covLine = '';
+                if (cov) {
+                  covLine = '<br>' + o.state + ' coverage: ' + (cov.coverage * 100).toFixed(1) +
+                    '% of population, ' + cov.sites + ' plant' + (cov.sites === 1 ? '' : 's');
+                  if (cov.coverage < STABLE_COVERAGE) covLine += '<br><em>Sparse, signal shown as unstable</em>';
+                }
                 tooltip.style.display = 'block';
                 tooltip.style.left = (info.x + 12) + 'px'; tooltip.style.top = (info.y - 12) + 'px';
                 tooltip.innerHTML = '<strong>' + o.county_names + '</strong>, ' + o.state +
-                  '<br>Viral percentile: ' + pct + '<br>Phase: Detection';
+                  '<br>Viral percentile: ' + pct + covLine;
               } else tooltip.style.display = 'none';
             }
           });
@@ -1377,11 +1532,22 @@
       var ridgeSvg = d3.select('#ridgeline-svg');
       var ridgeMarkerLine = null;
 
+      // Remembered so the plot can be rebuilt once the panel actually has a size.
+      var ridgeWindow = null;
+
       function buildRidgeline(startDate, endDate) {
+        ridgeWindow = { start: startDate, end: endDate };
         var container = document.getElementById('ridgeline-container');
         var W = container.offsetWidth;
         var H = container.offsetHeight;
         var margin = { top: 46, right: 30, bottom: 30, left: 130 };
+
+        // If this runs before the panel has been laid out, every width and height
+        // below comes out negative and the browser rejects the shapes. Wait and
+        // rebuild from showRidgeline instead of drawing garbage.
+        if (W < margin.left + margin.right + 60 || H < margin.top + margin.bottom + 40) {
+          return;
+        }
 
         ridgeSvg.attr('width', W).attr('height', H)
           .style('overflow', 'visible')
@@ -1447,6 +1613,7 @@
 
         // Store all region groups for hover interaction
         var regionGroups = [];
+        var leadSpans = [];
 
         // Draw top-to-bottom
         for (var ri = 0; ri < visibleRegions.length; ri++) {
@@ -1545,7 +1712,88 @@
             .text(region);
 
           regionGroups.push({ g: g, labelG: labelG, region: region });
+
+          // Remember where this region's wastewater signal peaked. The lead spans get
+          // drawn after every row, so they sit on top of the curves rather than under
+          // whichever row happens to be painted next.
+          var vDef = VARIANTS[currentVariantId];
+          if (vDef.exemplarRegion === region && wwPoints.length && clPoints.length) {
+            var wpk = wwPoints.reduce(function(a, b) { return b.val > a.val ? b : a; }, wwPoints[0]);
+            var cpk = clPoints.reduce(function(a, b) { return b.val > a.val ? b : a; }, clPoints[0]);
+            leadSpans.push({ region: region, by: by, wwIdx: wpk.idx, clIdx: cpk.idx,
+                             peakVal: wpk.val, peakHeight: peakHeight,
+                             lead: vDef.exemplarLead });
+          }
         }
+
+        // ============================================
+        // LEAD TIME SPANS
+        // The horizontal gap is the whole point of this plot, so measure it rather
+        // than asking the viewer to judge it by eye. The span is anchored at the
+        // wastewater peak and runs for the lag found by cross-correlation, which is
+        // more trustworthy than peak-to-peak distance on a noisy curve.
+        // ============================================
+        leadSpans.forEach(function(s) {
+          var grp = ridgeSvg.append('g').attr('class', 'ridge-lead');
+          // Sit on this region's own peak rather than on its baseline. The curves are
+          // taller than the row spacing, so a bar drawn at the baseline lands inside
+          // the fill of the row below it and reads as belonging to the wrong region.
+          var y = s.by - s.peakVal * s.peakHeight + 22;
+          var colour = '#ffc14d';
+          // Both ends land on the crests the eye can actually see. The curves are drawn
+          // with curveBasis, which smooths past its control points rather than through
+          // them, so anchoring by data index leaves the bar visibly offset. No number is
+          // printed on it. The measured figure lives in the lead time panel, where it is
+          // not competing with a mark that is a fraction of a week off.
+          function crestX(sel) {
+            var rg = regionGroups.filter(function(r) { return r.region === s.region; })[0];
+            if (!rg) return null;
+            var node = rg.g.select(sel).node();
+            if (!node || !node.getTotalLength) return null;
+            var len = node.getTotalLength(), best = null;
+            for (var i = 0; i <= 300; i++) {
+              var pt = node.getPointAtLength(len * i / 300);
+              if (!best || pt.y < best.y) best = pt;
+            }
+            return best ? best.x : null;
+          }
+          var wwX = crestX('.ridge-ww-line');
+          var clX = crestX('.ridge-cl-line');
+          if (wwX == null) wwX = x(s.wwIdx);
+          if (clX == null) clX = x(s.clIdx);
+          var x1 = Math.min(wwX, clX), x2 = Math.max(wwX, clX);
+          if (s.lead.weeks === 0) {
+            // Both curves crest in the same week, so there is no span to draw. A single
+            // upright mark says that plainly, where a one pixel bar would just look
+            // like something failed to render.
+            var xm = (x1 + x2) / 2;
+            grp.append('line')
+              .attr('x1', xm).attr('x2', xm)
+              .attr('y1', y - 12).attr('y2', y + 26)
+              .attr('stroke', colour).attr('stroke-width', 2);
+            grp.append('text')
+              .attr('x', xm).attr('y', y - 18)
+              .attr('text-anchor', 'middle').attr('fill', colour)
+              .attr('font-size', '12px').attr('font-family', 'Special Elite')
+              .text('peaks together, no measurable lead');
+          } else {
+            grp.append('line')
+              .attr('x1', x1).attr('x2', x2).attr('y1', y).attr('y2', y)
+              .attr('stroke', colour).attr('stroke-width', 2);
+            [x1, x2].forEach(function(xx) {
+              grp.append('line').attr('x1', xx).attr('x2', xx)
+                .attr('y1', y - 6).attr('y2', y + 6)
+                .attr('stroke', colour).attr('stroke-width', 2);
+            });
+            // Approximate on purpose. The bar runs crest to crest, which is a fraction
+            // of a week off the fitted lag, and the exact figure lives in the panel.
+            grp.append('text')
+              .attr('x', (x1 + x2) / 2).attr('y', y - 11)
+              .attr('text-anchor', 'middle').attr('fill', colour)
+              .attr('font-size', '12px').attr('font-family', 'Special Elite')
+              .text('~' + s.lead.weeks + (s.lead.weeks === 1 ? ' week lead' : ' weeks lead'));
+          }
+        });
 
         // ============================================
         // HOVER INTERACTION
@@ -1769,6 +2017,12 @@
         ridgeContainer.classList.add('visible');
         ridgeToggle.classList.add('active');
         document.getElementById('map-perspective').classList.add('ridge-visible');
+        // If the plot was skipped because the panel had no size yet, draw it now that
+        // it does. Harmless when it was already drawn.
+        if (ridgeWindow && !ridgeSvg.select('.ridge-label-text').size()) {
+          buildRidgeline(ridgeWindow.start, ridgeWindow.end);
+          if (variantWeeks[currentWeekIndex]) updateRidgelineMarker(variantWeeks[currentWeekIndex]);
+        }
         // Trigger deck.gl resize after CSS transition completes
         setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 1600);
       }
@@ -2089,6 +2343,15 @@
           }, 800);
         }, 300);
       });
+
+      // Blink loop. Only runs during the detection phase, where the wastewater dots
+      // are the top layer and actually visible. After the breach the blue surface
+      // covers them, so there would be nothing to see.
+      setInterval(function() {
+        if (!inUpsideDown) return;
+        flickerTick++;
+        updateFrame();
+      }, 420);
 
       // Initial load (normal orientation, waiting for user)
       loadVariant('omicron');
